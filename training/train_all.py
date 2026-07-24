@@ -288,6 +288,10 @@ def export_tflite(model, name, rep_data):
             conv.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
             conv.inference_input_type = tf.int8
             conv.inference_output_type = tf.int8
+            # Per-tensor quant required: mtk-mdla_shim rejects per-channel weights
+            # (ANEURALNETWORKS_BAD_DATA while adding operation), and NNAPI never
+            # supported per-channel FULLY_CONNECTED at all.
+            conv._experimental_disable_per_channel = True
         blob = conv.convert()
         fname = f"{name}_{prec}.tflite"
         for d in (OUT, ASSETS):

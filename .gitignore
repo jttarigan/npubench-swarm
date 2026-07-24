@@ -8,3 +8,4 @@ training/tmp_export/
 *.iml
 .idea/
 .claude/
+runs_pull*/
