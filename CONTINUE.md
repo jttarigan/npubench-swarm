@@ -1,58 +1,75 @@
-# CONTINUE — session state (updated 2026-07-24, session 2)
+# CONTINUE — session state (updated 2026-07-24, session 2 END)
 
 Read this + `PROJECT_BRIEF.md` + `README.md` to resume from any machine.
 
 ## Where the project stands
 
-Build-order steps 1–5 are DONE. The full 2×2 money matrix (CPU/NPU × F32/INT8,
-XL model, 10-wave in-game sweeps) is measured, plus sustained back-to-back
-series on both backends. Step 6 (`analysis/analyze.py`) is written and being
-validated (check `analysis/out/` exists and regenerates cleanly).
+ALL MEASUREMENT IS DONE. Build-order steps 1–6 complete: three backends
+in-game (CPU/GPU/NPU), both precisions, crossover bracketed by bench with
+l192/l256 variants, sustained LOOP series on all backends, and
+`analysis/analyze.py` validated over the full dataset (156 files, 121k tick
+rows -> `analysis/out/`: tick_stats.csv, summary.md, 6 charts). What remains
+is chart polish + WRITING THE PAPER.
+
+App additions this session (all in the current APK + installed on device):
+7 model variants (T/S/M/L/192/256/XL), LOOP auto-replay toggle (unattended
+deterministic runs), gesture-CNN CPU fallback when a backend rejects it
+(GPU rejects EXPAND_DIMS; gesture CSV logs actual backend), '|' font glyph.
 
 ## Results (all CSVs pulled into `runs/`)
 
-Per-wave steady-state policy inference, XL (~330k params), N = 8→80:
+Per-wave steady-state policy inference, XL (534,531 params — NOT ~330k as
+earlier notes said), N = 8→80:
 
-- **CPU F32**: mean 2.5→6.0 ms scaling with N; p99 up to 11.5 ms (70% of the
-  16.7 ms budget); jitter high (p95 ≈ 3–4× mean). 0 deadline misses.
-- **NPU F32**: mean 0.91–0.98 ms FLAT across N; p99 ≤ 1.6 ms. 0 misses.
-- **CPU INT8**: mean 5.1→7.6 ms — SLOWER than CPU F32 (~2× at small N,
-  ~1.25× at N=80). Confirmed not thermal (CPU F32 at 39–40 °C ≈ same as at
-  34 °C). Per-tensor quant on XNNPACK loses to f32 sgemm here — a finding.
-- **NPU INT8**: mean 0.95–1.00 ms flat — no gain over F32 (allow_fp16=1 means
-  the f32 model already runs fp16 on the MDLA; dispatch floor dominates).
-- **NNAPI batch-resize recompile: ~98–118 ms at EVERY wave boundary** (vs
-  0.05–0.66 ms CPU resize), precision-independent. ≈7 dropped-tick stall at
-  each swarm-size change. Headline deployment finding: dynamic shapes are
-  hostile to the NPU path — pad to max batch or pre-compile.
+- **In-game backend profiles at XL/F32**: NPU ~0.9–1.0 ms FLAT; CPU 2.5→6 ms
+  scaling with N; GPU ~7.4 ms FLAT (batch-insensitive like NPU but 7.5x
+  slower; OpenGL-fallback path). Three distinct shapes — key figure.
+- **Crossover pinned by l192/l256 bench (batch 32, F32)**: CPU wins at 78k
+  (0.21 vs 0.55 ms), NPU wins at 136k (0.51 vs 1.02 ms) → crossover ≈ 100k
+  params. INT8 crossover: CPU int8 beats NPU even at XL in MICRO-BENCH
+  (0.35 vs 0.57 ms) — but see inversion below.
+- **HEADLINE: micro-bench vs in-situ inversion.** CPU XL INT8: bench 0.35 ms
+  but IN-GAME 5.1–7.6 ms (~18x degradation from contention with sim/render);
+  CPU F32 degrades only ~2x (2.15 -> ~4.5); NPU ~1.7x (0.57 -> 0.97). Isolated
+  microbenchmarks invert the precision ranking vs in-game measurement — the
+  core justification for the game-as-instrument method. NPU is not just fast
+  but load-immune (predictability argument).
+- **NNAPI batch-resize recompile ~98–118 ms at EVERY wave boundary** (vs
+  0.05–0.66 ms CPU), precision-independent. ≈7 dropped ticks per swarm-size
+  change: dynamic shapes are hostile to NPU — pad or pre-compile.
 - **INT8 per-channel rejection**: mtk-mdla_shim throws ANEURALNETWORKS_BAD_DATA
-  ("while adding operation") on per-channel quantized weights; NNAPI never
-  supported per-channel FULLY_CONNECTED at all. Fixed by per-tensor export
-  (`conv._experimental_disable_per_channel = True` in train_all.py). Failure
-  evidence preserved: `runs/run_20260724_1634{41,45}_*_coldstart.csv`.
-- **Thermal/sustained**: 3× CPU + 2× NPU back-to-back runs (~50 s each,
-  waves clear fast). Zero throttling (thermal_status 0, headroom 0.69–0.83);
-  CPU series pinned at 39 °C; NPU series COOLED during play (38.0→37.7 °C).
-  NPU offload is a thermal win too.
+  on per-channel weights; NNAPI never supported per-channel FULLY_CONNECTED.
+  Fixed via per-tensor export (flag in train_all.py). Evidence:
+  `runs/run_20260724_1634{41,45}_*_coldstart.csv`.
+- **LOOP mode = deterministic instrument**: every unattended run is EXACTLY
+  3624 ticks to victory (autofire clears all 10 waves, no player variance).
+  Unattended CPU runs show the first real deadline misses (1–6/run, from
+  higher alive-counts raising sim load).
+- **Thermal**: ~8.5 min sustained CPU (8 LOOP runs) flat 35.9 C; ~4.5 min NPU
+  flat 35.0 C; GPU series 36–37 C. Zero throttling anywhere (status 0);
+  NPU sessions COOL the device. Battery temp + headroom per-tick in CSVs.
 - Cold start NPU: delegate 7–22 ms + interpreter create 185 ms (int8) /
   259 ms (f32), first infer ~3–4 ms vs ~1 ms steady.
-- Repetitions: CPU F32 ×4, NPU F32 ×3, CPU INT8 ×1, NPU INT8 ×1.
+- Repetitions at XL: CPU F32 x12, NPU F32 x8, GPU F32 x6, CPU INT8 x2,
+  NPU INT8 x2 (per-run stats in analysis/out/tick_stats.csv).
 
 ## NEXT STEPS (in order)
 
-1. **INT8 reps**: 2 more game runs each of CPU+XL+INT8 and NPU+XL+INT8 so all
-   four cells have n≥3 (~4 min of play).
-2. Validate `analysis/analyze.py` end-to-end (should emit tick_stats.csv,
-   summary.md + 6 PNGs into `analysis/out/`); iterate on chart quality for
-   the paper figures.
-3. Optional: true 10-min sustained session per backend (≈12 back-to-back
-   runs) if reviewers will want a longer thermal claim than ~3–5 min.
-4. Optional: ~130k-param policy variant (e.g. 3x256) to pin the static
-   crossover (bench said ≈130k params at batch 32, between large and xlarge).
-5. Optional cosmetics: '|' renders as '?' in the 5x7 font (menu device list).
-6. Write the paper. Story arc: crossover chart + flat-NPU scaling + tail/jitter
-   analysis + reconfiguration/cold-start delays + quantization anti-findings
-   (per-channel rejected; int8 no faster on NPU, slower on CPU) + thermal.
+1. **Write the paper.** Story arc: (a) crossover chart with l192/l256 pins
+   (≈100k params F32); (b) three in-game backend profiles (NPU flat/low,
+   CPU scaling, GPU flat/high); (c) tail/jitter schedulability analysis;
+   (d) micro-bench vs in-situ INVERSION (CPU INT8 0.35 ms bench vs 5–7.6 ms
+   in-game) — the method's core justification; (e) delay costs: cold start +
+   ~110 ms NNAPI recompile per shape change; (f) deployment friction:
+   per-channel rejection, broken OpenCL, gesture-CNN GPU rejection;
+   (g) thermal: no throttling, NPU cools the device.
+2. Chart polish for camera-ready: consider log-y for crossover.png (budget
+   line compresses it), label the crossover point, maybe split latency_vs_N
+   into mean and p95 panels. Iterate `analysis/analyze.py`.
+3. Optional extra data (cheap now with LOOP): more INT8 reps, longer NPU/GPU
+   thermal sessions, glow-OFF control runs (brief promises one; still unrun
+   at XL — 1 LOOP session with GLOW OFF would close it).
+4. Optional: gesture-delay deep dive (gesture CSVs already rich: 912 strokes).
 
 ## Machine setup notes (both machines now validated)
 

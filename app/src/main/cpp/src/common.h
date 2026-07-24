@@ -75,8 +75,9 @@ inline const char* backendName(Backend b) {
 }
 inline const char* precisionName(Precision p) { return p == Precision::F32 ? "f32" : "int8"; }
 
-inline const char* kModelVariants[] = {"tiny", "small", "medium", "large", "xlarge"};
-constexpr int kNumVariants = 5;
+inline const char* kModelVariants[] = {"tiny", "small", "medium", "large",
+                                       "l192", "l256", "xlarge"};
+constexpr int kNumVariants = 7;
 
 // --- tiny vector math ---
 struct Vec2 {

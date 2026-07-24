@@ -53,6 +53,8 @@ POLICY_VARIANTS = {
     "small": (2, 32),
     "medium": (2, 64),
     "large": (3, 128),
+    "l192": (3, 192),   # ~78k params  } bracket the CPU->NPU crossover
+    "l256": (3, 256),   # ~136k params } (bench predicted ~130k at batch 32)
     "xlarge": (3, 512),
 }
 

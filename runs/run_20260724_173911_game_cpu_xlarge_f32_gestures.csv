@@ -1,0 +1,7 @@
+run_id,backend,precision,gesture_class,confidence,stroke_points,resample_ms,infer_ms,finger_up_to_effect_ms,accepted,note
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,none,0.8103,10,0.0019,1.7464,-1.0000,0,low_conf_or_none
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,slash,0.9926,18,0.0018,0.1877,8.1383,1,
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,slash,0.9175,25,0.0025,0.1222,-1.0000,0,cooldown
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,slash,0.9894,24,0.0024,0.1228,9.2699,1,
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,slash,0.9848,32,0.0012,0.0696,2.3151,1,
+20260724_173911_game_cpu_xlarge_f32,cpu,f32,slash,0.9831,19,0.0022,0.1241,7.8317,1,

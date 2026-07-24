@@ -19,7 +19,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 BUDGET_MS = 16.667  # 60 Hz tick budget
-PARAMS = {"tiny": 291, "small": 1635, "medium": 5315, "large": 35331, "xlarge": 330371}
+PARAMS = {"tiny": 291, "small": 1635, "medium": 5315, "large": 35331,
+          "l192": 77571, "l256": 136195, "xlarge": 534531}
 BACKEND_ORDER = {"cpu": 0, "gpu": 1, "npu": 2}
 MODEL_ORDER = {m: i for i, m in enumerate(PARAMS)}
 

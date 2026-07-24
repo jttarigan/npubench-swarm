@@ -13,7 +13,7 @@ constexpr uint32_t kMagCol = 0xFF3CDCFF;
 constexpr uint32_t kDimCol = 0x9080C0FF;
 constexpr uint32_t kWhiteCol = 0xFFFFFFFF;
 
-enum BtnGroup { GB_BACKEND, GB_MODEL, GB_PREC, GB_GLOW, GB_START, GB_BENCH };
+enum BtnGroup { GB_BACKEND, GB_MODEL, GB_PREC, GB_GLOW, GB_LOOP, GB_START, GB_BENCH };
 }  // namespace
 
 // ---------------------------------------------------------------------------
@@ -84,8 +84,17 @@ void Engine::finishLoading() {
         return;
     }
     if (!gesture_.load(assets_, gestureAssetPath(), backend_)) {
-        maybeWriteColdRowsForFailure();
-        return;
+        // GPU delegate rejects the gesture CNN (EXPAND_DIMS unsupported); the
+        // policy net is the measured workload, so fall back gesture-only to
+        // CPU rather than failing the whole run. Actual backend lands in CSVs.
+        if (backend_ != Backend::CPU &&
+            gesture_.load(assets_, gestureAssetPath(), Backend::CPU)) {
+            LOGW("gesture model fell back to CPU (backend %s rejected it)",
+                 backendName(backend_));
+        } else {
+            maybeWriteColdRowsForFailure();
+            return;
+        }
     }
     coldPolicyPending_ = coldGesturePending_ = true;
 
@@ -157,6 +166,8 @@ void Engine::endRun(AppState finalState) {
     maybeWriteColdRows(true);
     csv_.flush();
     state_ = finalState;
+    // ~2 s at 120 fps; never auto-replay an errored run
+    replayCountdown_ = autoReplay_ && finalState != AppState::ERRORS ? 240 : 0;
 }
 
 void Engine::maybeWriteColdRows(bool force) {
@@ -222,7 +233,7 @@ void Engine::handleStroke(const Stroke& s) {
 
     GestureRow row{};
     row.run_id = runId_.c_str();
-    row.backend = backendName(backend_);
+    row.backend = backendName(gesture_.backend());  // may be CPU fallback
     row.precision = precisionName(prec_);
     row.gesture_class = kGestureNames[res.cls];
     row.confidence = res.conf;
@@ -392,6 +403,13 @@ void Engine::frame() {
             break;
         case AppState::GAMEOVER:
         case AppState::VICTORY:
+            if (!taps.empty()) {
+                replayCountdown_ = 0;   // a tap always cancels the loop
+                state_ = AppState::MENU;
+            } else if (replayCountdown_ > 0 && --replayCountdown_ == 0) {
+                startGame();
+            }
+            break;
         case AppState::ERRORS:
             if (!taps.empty()) state_ = AppState::MENU;
             break;
@@ -594,6 +612,7 @@ void Engine::handleMenuTap(Vec2 p) {
             case GB_MODEL: variant_ = b.index; break;
             case GB_PREC: prec_ = (Precision)b.index; break;
             case GB_GLOW: glow_ = b.index == 0; break;
+            case GB_LOOP: autoReplay_ = !autoReplay_; break;
             case GB_START: startGame(); break;
             case GB_BENCH: startBench(); break;
         }
@@ -623,9 +642,9 @@ void Engine::renderMenu() {
 
     y = 136;
     rowLabel(y, "MODEL");
-    const char* mnames[5] = {"T", "S", "M", "L", "XL"};
-    for (int i = 0; i < 5; i++)
-        menuButton(GB_MODEL, i, 68.f + i * 34.f, (float)y, 30, 18, mnames[i], variant_ == i);
+    const char* mnames[kNumVariants] = {"T", "S", "M", "L", "192", "256", "XL"};
+    for (int i = 0; i < kNumVariants; i++)
+        menuButton(GB_MODEL, i, 68.f + i * 24.f, (float)y, 22, 18, mnames[i], variant_ == i);
 
     y = 164;
     rowLabel(y, "PREC");
@@ -636,6 +655,7 @@ void Engine::renderMenu() {
     rowLabel(y, "GLOW");
     menuButton(GB_GLOW, 0, 68, (float)y, 52, 18, "ON", glow_);
     menuButton(GB_GLOW, 1, 124, (float)y, 52, 18, "OFF", !glow_);
+    menuButton(GB_LOOP, 0, 184, (float)y, 48, 18, "LOOP", autoReplay_);
 
     menuButton(GB_START, 0, (float)(W / 2 - 70), 228, 140, 26, "START RUN", true);
     menuButton(GB_BENCH, 0, (float)(W / 2 - 90), 264, 180, 20, "BENCH ALL BACKENDS", false);
@@ -706,7 +726,10 @@ void Engine::renderEndScreen(const char* title) {
     snprintf(buf, sizeof(buf), "DEADLINE MISSES %d", missCount_);
     renderer_.textCentered(W / 2, H / 2 - 2, buf, missCount_ > 0 ? kMagCol : kCyanCol);
     renderer_.textCentered(W / 2, H / 2 + 24, "CSV FLUSHED", kDimCol);
-    renderer_.textCentered(W / 2, H / 2 + 48, "TAP FOR MENU", kWhiteCol);
+    if (replayCountdown_ > 0)
+        renderer_.textCentered(W / 2, H / 2 + 48, "LOOP: REPLAYING - TAP TO STOP", kWhiteCol);
+    else
+        renderer_.textCentered(W / 2, H / 2 + 48, "TAP FOR MENU", kWhiteCol);
 }
 
 void Engine::renderBench() {

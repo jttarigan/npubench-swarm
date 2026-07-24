@@ -83,6 +83,8 @@ private:
     int variant_ = 2;                 // default: medium
     Precision prec_ = Precision::F32;
     bool glow_ = true;
+    bool autoReplay_ = false;         // LOOP toggle: restart run on game-over/victory
+    int replayCountdown_ = 0;         // frames until auto-restart (0 = inactive)
 
     // run state
     int loadingStep_ = 0;

@@ -198,8 +198,9 @@ std::vector<uint8_t> buildAtlas(AtlasRegion regions[SPR_COUNT]) {
         regions[SPR_ZONE] = {0, 24, 32, 32};
     }
 
-    // --- FONT: ASCII 32..95 in 8x8 cells, 16/row, starting at (0, kFontAtlasY) ---
-    for (int i = 0; i <= kFontLastChar - kFontFirstChar; i++) {
+    // --- FONT: ASCII 32..95 (+ '|' at index 64) in 8x8 cells, 16/row,
+    //     starting at (0, kFontAtlasY) ---
+    for (int i = 0; i < kFontGlyphCount; i++) {
         int cx = (i % 16) * 8;
         int cy = kFontAtlasY + (i / 16) * 8;
         for (int r = 0; r < kFontGlyphH; r++) {

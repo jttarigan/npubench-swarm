@@ -349,8 +349,13 @@ void Renderer::text(int x, int y, const char* s, uint32_t color, int scale) {
     for (const char* p = s; *p; p++) {
         char c = *p;
         if (c >= 'a' && c <= 'z') c = (char)(c - 'a' + 'A');
-        if (c < kFontFirstChar || c > kFontLastChar) c = '?';
-        int i = c - kFontFirstChar;
+        int i;
+        if (c == '|') {
+            i = kFontBarIndex;
+        } else {
+            if (c < kFontFirstChar || c > kFontLastChar) c = '?';
+            i = c - kFontFirstChar;
+        }
         float gx = (float)((i % 16) * 8), gy = (float)(kFontAtlasY + (i / 16) * 8);
         pushQuad(batch, (float)cx, (float)y, (float)(cx + kFontGlyphW * scale),
                  (float)(y + kFontGlyphH * scale), gx / kAtlasSize, gy / kAtlasSize,
