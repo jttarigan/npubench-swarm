@@ -1,0 +1,7 @@
+run_id,backend,precision,gesture_class,confidence,stroke_points,resample_ms,infer_ms,finger_up_to_effect_ms,accepted,note
+20260724_140513_game_cpu_medium_f32,cpu,f32,circle,0.9987,51,0.0034,1.4317,4.1222,1,
+20260724_140513_game_cpu_medium_f32,cpu,f32,circle,0.9987,46,0.0028,0.1219,8.6982,1,
+20260724_140513_game_cpu_medium_f32,cpu,f32,circle,0.9998,50,0.0059,0.3988,4.5669,1,
+20260724_140513_game_cpu_medium_f32,cpu,f32,circle,0.9963,80,0.0038,0.1271,10.1299,1,
+20260724_140513_game_cpu_medium_f32,cpu,f32,slash,0.5894,57,0.0037,0.1225,5.0432,1,
+20260724_140513_game_cpu_medium_f32,cpu,f32,slash,0.7306,52,0.0025,0.0994,7.7348,1,

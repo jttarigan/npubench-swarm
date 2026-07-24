@@ -1,0 +1,2 @@
+run_id,backend,precision,gesture_class,confidence,stroke_points,resample_ms,infer_ms,finger_up_to_effect_ms,accepted,note
+20260724_140449_game_cpu_medium_f32,cpu,f32,none,0.5494,21,0.0049,2.6538,-1.0000,0,low_conf_or_none
