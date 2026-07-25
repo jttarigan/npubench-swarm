@@ -50,8 +50,25 @@ earlier notes said), N = 8→80:
   NPU sessions COOL the device. Battery temp + headroom per-tick in CSVs.
 - Cold start NPU: delegate 7–22 ms + interpreter create 185 ms (int8) /
   259 ms (f32), first infer ~3–4 ms vs ~1 ms steady.
-- Repetitions at XL: CPU F32 x12, NPU F32 x8, GPU F32 x6, CPU INT8 x2,
-  NPU INT8 x2 (per-run stats in analysis/out/tick_stats.csv).
+- Repetitions at XL (final): CPU F32 x19 (incl. 4 glow-OFF control runs),
+  NPU F32 x8, GPU F32 x6, CPU INT8 x5, NPU INT8 x8. Dataset: 66 game runs,
+  159,735 tick rows, 161 coldstart rows, 1,306 gestures (2026-07-24/25).
+- Glow-OFF control DONE: render-encode and inference stats unchanged vs
+  glow ON — closes the brief's control-run promise.
+- In-situ inversion final number: CPU XL INT8 degrades 15.1x (0.35 bench ->
+  5.30 ms in-game at N=32); NPU 1.5-1.8x.
+
+## Manuscript status (paper/manuscript_peerj_cs.docx)
+
+PeerJ CS draft written by desktop Claude, then verified/filled here against
+primary data: Table 1 variants, Android 16/HyperOS 3.0 build, dates, rep
+counts, Tables 2-4 fully updated to the final 66-run dataset, 13x->15.1x
+inversion propagated through abstract/intro/discussion/conclusions, glow-off
+control sentence added, airplane-mode claim corrected (never used), energy
+bracket resolved as future work. Backups: manuscript_peerj_cs.backup*.docx;
+patch scripts kept in paper/ for provenance. REMAINING (user-only): author
+names/affiliation, funding, license [MIT/CC-BY], GitHub URL (repo is still
+local-only — needs push), Zenodo DOI at deposit time.
 
 ## NEXT STEPS (in order)
 

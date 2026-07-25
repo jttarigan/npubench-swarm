@@ -1,32 +1,32 @@
 # NPU Bench Swarm — run summary
 
-Generated from `E:\OneDrive\MyProject\NPUBenchSwarm\runs` on 2026-07-24 18:59. 53 tick runs, 912 gesture rows, 135 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
+Generated from `E:\OneDrive\MyProject\NPUBenchSwarm\runs` on 2026-07-25 14:04. 66 tick runs, 1306 gesture rows, 161 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
 
 ## Steady-state policy inference (game runs, all waves pooled)
 
 | backend | model | prec | runs | ticks | inf mean | p50 | p95 | p99 | miss | miss% | render mean | tick p95 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | cpu | medium | f32 | 20 | 24031 | 0.101 | 0.081 | 0.219 | 0.347 | 0 | 0.00% | 5.667 | 0.293 |
-| cpu | xlarge | f32 | 15 | 37425 | 5.539 | 5.381 | 9.499 | 11.485 | 23 | 0.06% | 5.176 | 9.578 |
-| cpu | xlarge | int8 | 2 | 5641 | 5.736 | 5.969 | 8.530 | 9.801 | 1 | 0.02% | 5.127 | 8.582 |
+| cpu | xlarge | f32 | 19 | 48553 | 5.380 | 5.116 | 9.402 | 11.493 | 40 | 0.08% | 5.259 | 9.486 |
+| cpu | xlarge | int8 | 5 | 14812 | 6.180 | 6.371 | 8.561 | 9.666 | 3 | 0.02% | 5.104 | 8.608 |
 | gpu | xlarge | f32 | 6 | 17048 | 7.380 | 7.408 | 9.767 | 11.277 | 11 | 0.06% | 4.708 | 9.796 |
 | npu | xlarge | f32 | 8 | 26561 | 0.952 | 0.919 | 1.220 | 1.508 | 0 | 0.00% | 5.950 | 1.235 |
-| npu | xlarge | int8 | 2 | 5588 | 0.927 | 0.891 | 1.249 | 1.543 | 0 | 0.00% | 5.854 | 1.263 |
+| npu | xlarge | int8 | 8 | 23730 | 0.894 | 0.860 | 1.185 | 1.493 | 0 | 0.00% | 5.600 | 1.201 |
 
 ## Cold start (phase=cold rows; ms, mean over runs, -1 = failed excluded)
 
 | backend | model | prec | n | model load | delegate create | interp create | first infer | second infer |
 |---|---|---|---|---|---|---|---|---|
 | cpu | medium | f32 | 20 | 0.308 | 0.000 | 1.029 | 1.622 | 0.061 |
-| cpu | xlarge | f32 | 15 | 5.185 | 0.000 | 0.817 | 9.420 | 2.075 |
-| cpu | xlarge | int8 | 2 | 1.014 | 0.000 | 1.591 | 4.654 | 4.492 |
-| cpu | gesture | f32 | 37 | 0.229 | 0.000 | 0.897 | 1.271 | 0.129 |
-| cpu | gesture | int8 | 2 | 0.247 | 0.000 | 1.690 | 0.153 | 0.147 |
+| cpu | xlarge | f32 | 19 | 5.597 | 0.000 | 0.782 | 9.880 | 1.935 |
+| cpu | xlarge | int8 | 5 | 1.128 | 0.000 | 2.761 | 6.548 | 4.862 |
+| cpu | gesture | f32 | 41 | 0.230 | 0.000 | 0.885 | 1.318 | 0.133 |
+| cpu | gesture | int8 | 5 | 0.250 | 0.000 | 1.545 | 0.154 | 0.130 |
 | gpu | xlarge | f32 | 7 | 5.990 | 0.007 | 35.743 | 8.725 | 5.833 |
 | npu | xlarge | f32 | 8 | 4.129 | 2.805 | 113.971 | 2.994 | 1.048 |
-| npu | xlarge | int8 | 4 | 1.752 | 1.726 | 105.524 | 3.732 | 2.117 |
+| npu | xlarge | int8 | 10 | 1.283 | 1.686 | 101.059 | 3.430 | 1.230 |
 | npu | gesture | f32 | 8 | 0.090 | 0.003 | 94.759 | 2.530 | 1.079 |
-| npu | gesture | int8 | 2 | 0.082 | 0.003 | 109.409 | 2.197 | 0.891 |
+| npu | gesture | int8 | 8 | 0.080 | 0.003 | 101.760 | 2.214 | 0.863 |
 
 ## Micro-bench steady state (batch 32, 200 iters; ms, mean over runs)
 
@@ -61,7 +61,7 @@ Generated from `E:\OneDrive\MyProject\NPUBenchSwarm\runs` on 2026-07-24 18:59. 5
 
 | backend | prec | strokes | accepted | infer mean | infer p95 | up->effect mean | up->effect p95 |
 |---|---|---|---|---|---|---|---|
-| cpu | f32 | 682 | 549 | 0.187 | 0.654 | 6.91 | 11.61 |
-| cpu | int8 | 62 | 60 | 0.103 | 0.142 | 6.99 | 11.49 |
+| cpu | f32 | 835 | 683 | 0.183 | 0.598 | 6.94 | 11.70 |
+| cpu | int8 | 146 | 133 | 0.106 | 0.143 | 6.99 | 11.34 |
 | npu | f32 | 105 | 96 | 0.971 | 1.208 | 7.25 | 10.98 |
-| npu | int8 | 63 | 60 | 0.943 | 1.156 | 6.68 | 10.64 |
+| npu | int8 | 220 | 197 | 0.930 | 1.294 | 6.95 | 10.84 |
