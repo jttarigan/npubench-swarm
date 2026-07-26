@@ -58,9 +58,10 @@ earlier notes said), N = 8→80:
 - In-situ inversion final number: CPU XL INT8 degrades 15.1x (0.35 bench ->
   5.30 ms in-game at N=32); NPU 1.5-1.8x.
 
-## Manuscript status (paper/manuscript_peerj_cs.docx)
+## Manuscript status (paper/manuscript.docx)
 
-PeerJ CS draft written by desktop Claude, then verified/filled here against
+Journal manuscript draft written by desktop Claude, then verified/filled
+here against
 primary data: Table 1 variants, Android 16/HyperOS 3.0 build, dates, rep
 counts, Tables 2-4 fully updated to the final 66-run dataset, 13x->15.1x
 inversion propagated through abstract/intro/discussion/conclusions, glow-off
@@ -80,7 +81,10 @@ zenodo.XXXXXXX]) and DATA_README.md, regenerate SHA256SUMS, re-zip/upload;
 (3) Acknowledgements section still says [Optional.] — write or delete;
 (4) delete the drafting-note paragraph on the manuscript title page
 ("Manuscript draft prepared for submission... placeholders...") before
-submission; (5) final human proofread, then submit to PeerJ CS.
+submission; (5) final human proofread, then submit to the target journal
+(first choice recorded in the manuscript itself; artifact/repo materials are
+deliberately journal- and title-neutral so a resubmission elsewhere under a
+different title requires no artifact changes).
 
 ## NEXT STEPS (in order)
 

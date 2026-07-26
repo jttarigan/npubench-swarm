@@ -8,8 +8,8 @@ the top priority** — every architectural decision must preserve clean, timesta
 exportable measurements. When in doubt between "nicer gameplay" and "cleaner data,"
 choose cleaner data. A feature that cannot be measured is not worth building.
 
-- Target paper: *"Can Game AI Meet the Tick? Latency Benchmarking of Neural Game
-  Mechanics on a Mobile NPU (MediaTek APU 780)"* (working title).
+- Target paper: a latency-benchmarking study of neural game mechanics on a
+  mobile NPU (MediaTek APU 780); title and venue are decided at submission.
 - Timeline: 1–2 days of development + measurement. Keep scope brutally minimal.
 - Metrics: **delay** (input-to-effect latency, cold-start/init latency) and
   **processing time** (per-inference time, per-tick time), across CPU / GPU / NPU

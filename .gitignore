@@ -9,3 +9,4 @@ training/tmp_export/
 .idea/
 .claude/
 runs_pull*/
+zenodo_deposit/
