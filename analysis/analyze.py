@@ -166,7 +166,7 @@ def md_table(lines, header, rows):
 
 
 md = ["# NPU Bench Swarm — run summary", "",
-      f"Generated from `{os.path.abspath(RUNS)}` on {datetime.now():%Y-%m-%d %H:%M}. "
+      f"Generated from `{os.path.basename(os.path.abspath(RUNS))}/` on {datetime.now():%Y-%m-%d %H:%M}. "
       f"{len(tick_runs)} tick runs, {len(gesture_rows)} gesture rows, "
       f"{len(cold_rows)} coldstart rows. Warmup ticks and -1 sentinels excluded; "
       f"tick budget {BUDGET_MS} ms.", ""]

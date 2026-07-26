@@ -1,6 +1,6 @@
 # NPU Bench Swarm — run summary
 
-Generated from `E:\OneDrive\MyProject\NPUBenchSwarm\runs` on 2026-07-25 14:04. 66 tick runs, 1306 gesture rows, 161 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
+Generated from `runs/` on 2026-07-26 20:09. 66 tick runs, 1306 gesture rows, 161 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
 
 ## Steady-state policy inference (game runs, all waves pooled)
 
