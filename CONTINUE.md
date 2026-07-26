@@ -66,9 +66,21 @@ counts, Tables 2-4 fully updated to the final 66-run dataset, 13x->15.1x
 inversion propagated through abstract/intro/discussion/conclusions, glow-off
 control sentence added, airplane-mode claim corrected (never used), energy
 bracket resolved as future work. Backups: manuscript_peerj_cs.backup*.docx;
-patch scripts kept in paper/ for provenance. REMAINING (user-only): author
-names/affiliation, funding, license [MIT/CC-BY], GitHub URL (repo is still
-local-only — needs push), Zenodo DOI at deposit time.
+patch scripts kept in paper/ for provenance. Author metadata, funding
+(none), licenses (MIT code / CC BY 4.0 data+models), and GitHub URL are
+FILLED. Public repo: https://github.com/jttarigan/npubench-swarm — pushed
+from the `public` branch (filtered history: no paper/, no AI co-author
+trailers, author normalized to full name; re-filter from main + force-push
+to update). Zenodo deposit folder ready at %USERPROFILE%\zenodo_deposit
+(299 files, 54.5 MB, checksums + full DATA_README with CSV dictionaries).
+
+REMAINING: (1) user uploads zenodo_deposit/ contents to zenodo.org →
+receives DOI; (2) patch DOI into manuscript ([Zenodo DOI: 10.5281/
+zenodo.XXXXXXX]) and DATA_README.md, regenerate SHA256SUMS, re-zip/upload;
+(3) Acknowledgements section still says [Optional.] — write or delete;
+(4) delete the drafting-note paragraph on the manuscript title page
+("Manuscript draft prepared for submission... placeholders...") before
+submission; (5) final human proofread, then submit to PeerJ CS.
 
 ## NEXT STEPS (in order)
 
