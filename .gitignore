@@ -10,3 +10,4 @@ training/tmp_export/
 .claude/
 runs_pull*/
 zenodo_deposit/
+zenodo_upload/
