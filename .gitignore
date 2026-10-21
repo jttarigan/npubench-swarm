@@ -1,0 +1,15 @@
+.venv/
+python-embed/
+python-embed.zip
+get-pip.py
+build/
+*.exe
+*.obj
+hostsim_strict
+hostsim_precise
+hostsim_contract
+hostsim
+pp_cli
+run.log
+mac_run.log
+__pycache__/

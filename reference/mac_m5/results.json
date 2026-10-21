@@ -1,0 +1,884 @@
+{
+ "env": {
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "processor": "arm",
+  "cpu_count": 10,
+  "python": "3.9.6",
+  "numpy": "2.0.2",
+  "tensorflow": "2.20.0",
+  "hostname": "Joss-MacBook-Air.local",
+  "cpu_name": "Apple M5"
+ },
+ "started": "2026-10-21T15:10:12+0700",
+ "replays": {
+  "replay_xlarge_f32_xnnpack": {
+   "md5": "525c36d6bcee6afe35da766be65e8401",
+   "seconds": 0.9
+  },
+  "replay_xlarge_f32_builtin": {
+   "md5": "c2def721e9d32faaaec2794ed4861a7c",
+   "seconds": 0.6
+  },
+  "replay_xlarge_f32_ref": {
+   "md5": "7f82bade398fd65c0b2fff293746b818",
+   "seconds": 31.6
+  },
+  "replay_xlarge_int8_xnnpack": {
+   "md5": "560d788c76b1e9d080286f9c33482a7a",
+   "seconds": 0.3
+  },
+  "replay_xlarge_int8_builtin": {
+   "md5": "560d788c76b1e9d080286f9c33482a7a",
+   "seconds": 0.2
+  },
+  "replay_xlarge_int8_ref": {
+   "md5": "6905b8330ebce0624884cc248fa63b45",
+   "seconds": 6.0
+  },
+  "replay_tiny_f32_xnnpack": {
+   "md5": "4268de83bad70e06fc0730a0263d761b",
+   "seconds": 0.0
+  },
+  "replay_tiny_f32_builtin": {
+   "md5": "ee4c8dda9115ee6d5a4f36378691bf48",
+   "seconds": 0.0
+  },
+  "replay_tiny_f32_ref": {
+   "md5": "54dd3e4e9a284b0b1da31a2aa9b48a9b",
+   "seconds": 0.0
+  },
+  "replay_tiny_int8_xnnpack": {
+   "md5": "2232ed14cae3261d8aa23ff530fcd034",
+   "seconds": 0.1
+  },
+  "replay_tiny_int8_builtin": {
+   "md5": "56d7822ead1c02da967133b0bd82ccf0",
+   "seconds": 0.0
+  },
+  "replay_tiny_int8_ref": {
+   "md5": "3f4fea1326d9665debded5928838c9a6",
+   "seconds": 0.1
+  }
+ },
+ "portable": {
+  "xlarge": {
+   "md5": "9f5ddbf8c0702936f7959fe146094fae"
+  },
+  "tiny": {
+   "md5": "28dc78dae6d18ee3f2f14f4ac85dea72"
+  }
+ },
+ "validate": {
+  "hostsim_strict/xlarge": {
+   "ok": false,
+   "ticks": 3724,
+   "state_identical_ticks": 50,
+   "first_state_diff_tick": 17,
+   "feature_mismatches": 3656,
+   "file_equal": false
+  },
+  "hostsim_strict/tiny": {
+   "ok": false,
+   "ticks": 4407,
+   "state_identical_ticks": 29,
+   "first_state_diff_tick": 13,
+   "feature_mismatches": 4349,
+   "file_equal": false
+  },
+  "hostsim_contract/xlarge": {
+   "ok": true,
+   "ticks": 3724,
+   "state_identical_ticks": 3724,
+   "first_state_diff_tick": null,
+   "feature_mismatches": 0,
+   "file_equal": true
+  },
+  "hostsim_contract/tiny": {
+   "ok": true,
+   "ticks": 4407,
+   "state_identical_ticks": 4407,
+   "first_state_diff_tick": null,
+   "feature_mismatches": 0,
+   "file_equal": true
+  }
+ },
+ "seeds": {
+  "xlarge_xnnpack_0": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3724,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_1": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_2": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3711,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_3": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3673,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_4": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3747,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_5": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3761,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_6": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3749,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_7": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3685,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_8": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3703,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_9": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3697,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_10": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3683,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_11": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3695,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_12": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3634,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_13": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3753,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_14": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3683,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_15": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_xnnpack_16": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_17": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3706,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_18": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3701,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_xnnpack_19": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3678,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_0": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3724,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_1": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_2": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3711,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_3": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3673,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_4": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3747,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_5": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3761,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_6": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3749,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_7": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3685,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_8": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3703,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_9": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3697,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_10": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3683,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_11": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3695,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_12": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3634,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_13": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3753,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_14": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3683,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_15": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "xlarge_builtin_16": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3725,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_17": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3706,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_18": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3701,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "xlarge_builtin_19": {
+   "hostsim": "hostsim_strict",
+   "ticks": 3678,
+   "wave": 10,
+   "score": 440,
+   "hp": 7
+  },
+  "tiny_xnnpack_0": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4407,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_1": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4469,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_2": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4336,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_xnnpack_3": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4401,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_4": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4433,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_5": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4439,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_6": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4455,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_7": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4438,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_8": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4501,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_xnnpack_9": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4439,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_xnnpack_10": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4388,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_11": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4612,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_12": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4371,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_13": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4484,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_xnnpack_14": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4402,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_15": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4437,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_16": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4302,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_17": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4402,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_xnnpack_18": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4427,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_xnnpack_19": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4585,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_0": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4407,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_1": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4469,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_2": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4336,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_builtin_3": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4401,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_4": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4433,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_5": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4439,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_6": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4455,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_7": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4438,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_8": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4501,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_builtin_9": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4439,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_builtin_10": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4388,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_11": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4612,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_12": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4371,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_13": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4484,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_builtin_14": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4402,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_15": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4437,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_16": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4302,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_17": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4402,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  },
+  "tiny_builtin_18": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4427,
+   "wave": 10,
+   "score": 440,
+   "hp": 6
+  },
+  "tiny_builtin_19": {
+   "hostsim": "hostsim_strict",
+   "ticks": 4585,
+   "wave": 10,
+   "score": 440,
+   "hp": 5
+  }
+ },
+ "compare": {
+  "replay_xlarge_f32_xnnpack": {
+   "device:R1_android_cpu_xlarge_f32": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 230645,
+    "rows_differing": 120620,
+    "max_abs_diff": 1.3113021850585938e-06,
+    "median_ulp": 2,
+    "fire_flips": 0
+   },
+   "device:R11_iphone_cpu_xlarge_f32_litert220": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 234458,
+    "rows_differing": 120985,
+    "max_abs_diff": 1.1622905731201172e-06,
+    "median_ulp": 2,
+    "fire_flips": 0
+   },
+   "device:R19_iphone_cpu_xlarge_f32_litert217": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 242963,
+    "rows_differing": 121296,
+    "max_abs_diff": 1.1324882507324219e-06,
+    "median_ulp": 2,
+    "fire_flips": 0
+   }
+  },
+  "replay_xlarge_f32_builtin": {
+   "device:R1_android_cpu_xlarge_f32": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 201908,
+    "rows_differing": 118025,
+    "max_abs_diff": 1.1920928955078125e-06,
+    "median_ulp": 2,
+    "fire_flips": 0
+   },
+   "device:R11_iphone_cpu_xlarge_f32_litert220": {
+    "identical": true,
+    "values": 370062,
+    "values_differing": 0,
+    "rows_differing": 0,
+    "max_abs_diff": 0.0,
+    "median_ulp": 0,
+    "fire_flips": 0
+   },
+   "device:R19_iphone_cpu_xlarge_f32_litert217": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 187913,
+    "rows_differing": 110796,
+    "max_abs_diff": 2.980232238769531e-07,
+    "median_ulp": 1,
+    "fire_flips": 0
+   }
+  },
+  "replay_xlarge_f32_ref": {
+   "device:R1_android_cpu_xlarge_f32": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 232540,
+    "rows_differing": 120691,
+    "max_abs_diff": 1.2665987014770508e-06,
+    "median_ulp": 2,
+    "fire_flips": 0
+   },
+   "device:R11_iphone_cpu_xlarge_f32_litert220": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 219796,
+    "rows_differing": 118544,
+    "max_abs_diff": 8.344650268554688e-07,
+    "median_ulp": 1,
+    "fire_flips": 0
+   },
+   "device:R19_iphone_cpu_xlarge_f32_litert217": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 225204,
+    "rows_differing": 119234,
+    "max_abs_diff": 8.344650268554688e-07,
+    "median_ulp": 1,
+    "fire_flips": 0
+   }
+  },
+  "replay_xlarge_int8_xnnpack": {
+   "device:R12_iphone_cpu_xlarge_int8": {
+    "identical": true,
+    "values": 370062,
+    "values_differing": 0,
+    "rows_differing": 0,
+    "max_abs_diff": 0.0,
+    "median_ulp": 0,
+    "fire_flips": 0
+   },
+   "device:R2_android_cpu_xlarge_int8": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 4658,
+    "rows_differing": 4582,
+    "max_abs_diff": 0.109375,
+    "median_ulp": 786432,
+    "fire_flips": 5
+   }
+  },
+  "replay_xlarge_int8_builtin": {
+   "device:R12_iphone_cpu_xlarge_int8": {
+    "identical": true,
+    "values": 370062,
+    "values_differing": 0,
+    "rows_differing": 0,
+    "max_abs_diff": 0.0,
+    "median_ulp": 0,
+    "fire_flips": 0
+   },
+   "device:R2_android_cpu_xlarge_int8": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 4658,
+    "rows_differing": 4582,
+    "max_abs_diff": 0.109375,
+    "median_ulp": 786432,
+    "fire_flips": 5
+   }
+  },
+  "replay_xlarge_int8_ref": {
+   "device:R12_iphone_cpu_xlarge_int8": {
+    "identical": false,
+    "values": 370062,
+    "values_differing": 4658,
+    "rows_differing": 4582,
+    "max_abs_diff": 0.109375,
+    "median_ulp": 786432,
+    "fire_flips": 5
+   },
+   "device:R2_android_cpu_xlarge_int8": {
+    "identical": true,
+    "values": 370062,
+    "values_differing": 0,
+    "rows_differing": 0,
+    "max_abs_diff": 0.0,
+    "median_ulp": 0,
+    "fire_flips": 0
+   }
+  },
+  "replay_tiny_f32_xnnpack": {
+   "device:T1_android_cpu_tiny_f32": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 290127,
+    "rows_differing": 127727,
+    "max_abs_diff": 5.289912223815918e-07,
+    "median_ulp": 2,
+    "fire_flips": 0
+   }
+  },
+  "replay_tiny_f32_builtin": {
+   "device:T1_android_cpu_tiny_f32": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 171142,
+    "rows_differing": 107888,
+    "max_abs_diff": 3.8743019104003906e-07,
+    "median_ulp": 2,
+    "fire_flips": 0
+   }
+  },
+  "replay_tiny_f32_ref": {
+   "device:T1_android_cpu_tiny_f32": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 250731,
+    "rows_differing": 124093,
+    "max_abs_diff": 3.8743019104003906e-07,
+    "median_ulp": 1,
+    "fire_flips": 0
+   }
+  },
+  "replay_tiny_int8_xnnpack": {
+   "device:T2_android_cpu_tiny_int8": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 3061,
+    "rows_differing": 2738,
+    "max_abs_diff": 0.0234375,
+    "median_ulp": 262144,
+    "fire_flips": 3
+   }
+  },
+  "replay_tiny_int8_builtin": {
+   "device:T2_android_cpu_tiny_int8": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 3052,
+    "rows_differing": 2729,
+    "max_abs_diff": 0.0234375,
+    "median_ulp": 262144,
+    "fire_flips": 3
+   }
+  },
+  "replay_tiny_int8_ref": {
+   "device:T2_android_cpu_tiny_int8": {
+    "identical": false,
+    "values": 389232,
+    "values_differing": 1,
+    "rows_differing": 1,
+    "max_abs_diff": 0.015625,
+    "median_ulp": 262144,
+    "fire_flips": 0
+   }
+  }
+ },
+ "finished": "2026-10-21T15:11:33+0700"
+}
