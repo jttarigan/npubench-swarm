@@ -9,6 +9,9 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <chrono>
+#endif
 
 #define LOG_TAG "NPUBench"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -16,11 +19,19 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // --- timing: CLOCK_MONOTONIC only, never wall clock (PROJECT_BRIEF) ---
+#ifdef _WIN32
+// MSVC has no clock_gettime; steady_clock is the monotonic clock there (x86 kit host build only).
+inline int64_t now_ns() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+               std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+#else
 inline int64_t now_ns() {
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return static_cast<int64_t>(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
 }
+#endif
 inline double ns_to_ms(int64_t ns) { return static_cast<double>(ns) * 1e-6; }
 
 // --- simulation / measurement contract ---

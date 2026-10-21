@@ -32,6 +32,10 @@
 #include "game.h"
 #include "trace.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846   // MSVC's <cmath> defines it only with _USE_MATH_DEFINES
+#endif
+
 // game.cpp's render() references these; the host never draws.
 void Renderer::sprite(SpriteId, Vec2, float, uint32_t, bool, float) {}
 void Renderer::rect(float, float, float, float, uint32_t, bool) {}
