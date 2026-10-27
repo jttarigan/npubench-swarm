@@ -1,17 +1,17 @@
 # NPU Bench Swarm — run summary
 
-Generated from `runs/` on 2026-07-26 20:09. 66 tick runs, 1306 gesture rows, 161 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
+Generated from `runs/` on 2026-08-01 16:45. 66 tick runs, 1306 gesture rows, 161 coldstart rows. Warmup ticks and -1 sentinels excluded; tick budget 16.667 ms.
 
 ## Steady-state policy inference (game runs, all waves pooled)
 
-| backend | model | prec | runs | ticks | inf mean | p50 | p95 | p99 | miss | miss% | render mean | tick p95 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| cpu | medium | f32 | 20 | 24031 | 0.101 | 0.081 | 0.219 | 0.347 | 0 | 0.00% | 5.667 | 0.293 |
-| cpu | xlarge | f32 | 19 | 48553 | 5.380 | 5.116 | 9.402 | 11.493 | 40 | 0.08% | 5.259 | 9.486 |
-| cpu | xlarge | int8 | 5 | 14812 | 6.180 | 6.371 | 8.561 | 9.666 | 3 | 0.02% | 5.104 | 8.608 |
-| gpu | xlarge | f32 | 6 | 17048 | 7.380 | 7.408 | 9.767 | 11.277 | 11 | 0.06% | 4.708 | 9.796 |
-| npu | xlarge | f32 | 8 | 26561 | 0.952 | 0.919 | 1.220 | 1.508 | 0 | 0.00% | 5.950 | 1.235 |
-| npu | xlarge | int8 | 8 | 23730 | 0.894 | 0.860 | 1.185 | 1.493 | 0 | 0.00% | 5.600 | 1.201 |
+| backend | model | prec | runs | ticks | inf mean | p50 | p95 | p99 | miss | miss% | >8.33 | >8.33% | render mean | tick p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| cpu | medium | f32 | 20 | 24031 | 0.101 | 0.081 | 0.219 | 0.347 | 0 | 0.00% | 0 | 0.00% | 5.667 | 0.293 |
+| cpu | xlarge | f32 | 19 | 48553 | 5.380 | 5.116 | 9.402 | 11.493 | 40 | 0.08% | 5534 | 11.40% | 5.259 | 9.486 |
+| cpu | xlarge | int8 | 5 | 14812 | 6.180 | 6.371 | 8.561 | 9.666 | 3 | 0.02% | 1109 | 7.49% | 5.104 | 8.608 |
+| gpu | xlarge | f32 | 6 | 17048 | 7.380 | 7.408 | 9.767 | 11.277 | 11 | 0.06% | 3059 | 17.94% | 4.708 | 9.796 |
+| npu | xlarge | f32 | 8 | 26561 | 0.952 | 0.919 | 1.220 | 1.508 | 0 | 0.00% | 2 | 0.01% | 5.950 | 1.235 |
+| npu | xlarge | int8 | 8 | 23730 | 0.894 | 0.860 | 1.185 | 1.493 | 0 | 0.00% | 0 | 0.00% | 5.600 | 1.201 |
 
 ## Cold start (phase=cold rows; ms, mean over runs, -1 = failed excluded)
 

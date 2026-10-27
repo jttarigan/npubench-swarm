@@ -1,0 +1,305 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5D0000000000000000000101 /* TensorFlowLiteC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0000000000000000000201 /* TensorFlowLiteC.xcframework */; };
+		5D0000000000000000000102 /* TensorFlowLiteCMetal.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0000000000000000000202 /* TensorFlowLiteCMetal.xcframework */; };
+		5D0000000000000000000103 /* TensorFlowLiteCCoreML.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D0000000000000000000203 /* TensorFlowLiteCCoreML.xcframework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		5D0000000000000000000201 /* TensorFlowLiteC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TensorFlowLiteC.xcframework; path = "third_party/litert-ios/TensorFlowLiteC.xcframework"; sourceTree = "<group>"; };
+		5D0000000000000000000202 /* TensorFlowLiteCMetal.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TensorFlowLiteCMetal.xcframework; path = "third_party/litert-ios/TensorFlowLiteCMetal.xcframework"; sourceTree = "<group>"; };
+		5D0000000000000000000203 /* TensorFlowLiteCCoreML.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TensorFlowLiteCCoreML.xcframework; path = "third_party/litert-ios/TensorFlowLiteCCoreML.xcframework"; sourceTree = "<group>"; };
+		5D0000000000000000000301 /* NPUBenchDet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NPUBenchDet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5D0000000000000000000501 /* Exceptions for "GameSrc" folder in "NPUBenchDet" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				csvlog.cpp,
+				engine.cpp,
+				gesture.cpp,
+				input.cpp,
+				main.cpp,
+				nn.cpp,
+				renderer.cpp,
+				sprites.cpp,
+			);
+			target = 5D0000000000000000000601 /* NPUBenchDet */;
+		};
+		5D0000000000000000000502 /* Exceptions for "Models" folder in "NPUBenchDet" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				gesture_f32.tflite,
+				gesture_int8.tflite,
+			);
+			target = 5D0000000000000000000601 /* NPUBenchDet */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5D0000000000000000000401 /* NPUBenchDet */ = {isa = PBXFileSystemSynchronizedRootGroup; path = NPUBenchDet; sourceTree = "<group>"; };
+		5D0000000000000000000402 /* GameSrc */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5D0000000000000000000501 /* Exceptions for "GameSrc" folder in "NPUBenchDet" target */, ); name = GameSrc; path = ../app/src/main/cpp/src; sourceTree = "<group>"; };
+		5D0000000000000000000403 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (5D0000000000000000000502 /* Exceptions for "Models" folder in "NPUBenchDet" target */, ); name = Models; path = ../app/src/main/assets/models; sourceTree = "<group>"; };
+		5D0000000000000000000404 /* replay */ = {isa = PBXFileSystemSynchronizedRootGroup; path = replay; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5D0000000000000000000701 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5D0000000000000000000101 /* TensorFlowLiteC.xcframework in Frameworks */,
+				5D0000000000000000000102 /* TensorFlowLiteCMetal.xcframework in Frameworks */,
+				5D0000000000000000000103 /* TensorFlowLiteCCoreML.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5D0000000000000000000801 = {
+			isa = PBXGroup;
+			children = (
+				5D0000000000000000000401 /* NPUBenchDet */,
+				5D0000000000000000000402 /* GameSrc */,
+				5D0000000000000000000403 /* Models */,
+				5D0000000000000000000404 /* replay */,
+				5D0000000000000000000802 /* Frameworks */,
+				5D0000000000000000000803 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5D0000000000000000000802 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5D0000000000000000000201 /* TensorFlowLiteC.xcframework */,
+				5D0000000000000000000202 /* TensorFlowLiteCMetal.xcframework */,
+				5D0000000000000000000203 /* TensorFlowLiteCCoreML.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5D0000000000000000000803 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5D0000000000000000000301 /* NPUBenchDet.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5D0000000000000000000601 /* NPUBenchDet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5D0000000000000000000A02 /* Build configuration list for PBXNativeTarget "NPUBenchDet" */;
+			buildPhases = (
+				5D0000000000000000000901 /* Sources */,
+				5D0000000000000000000701 /* Frameworks */,
+				5D0000000000000000000902 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5D0000000000000000000401 /* NPUBenchDet */,
+				5D0000000000000000000402 /* GameSrc */,
+				5D0000000000000000000403 /* Models */,
+				5D0000000000000000000404 /* replay */,
+			);
+			name = NPUBenchDet;
+			productName = NPUBenchDet;
+			productReference = 5D0000000000000000000301 /* NPUBenchDet.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5D0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					5D0000000000000000000601 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+				};
+			};
+			buildConfigurationList = 5D0000000000000000000A01 /* Build configuration list for PBXProject "NPUBenchDet" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5D0000000000000000000801;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5D0000000000000000000803 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5D0000000000000000000601 /* NPUBenchDet */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5D0000000000000000000902 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5D0000000000000000000901 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5D0000000000000000000B01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		5D0000000000000000000B02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5D0000000000000000000C01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../tools/hostsim/stubs",
+					"$(SRCROOT)/../app/src/main/cpp/src",
+				);
+				INFOPLIST_FILE = "NPUBenchDet-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "NPUBench Det";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Metal,
+					"-framework",
+					CoreML,
+					"-framework",
+					UIKit,
+					"-framework",
+					Foundation,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.josta.npubench.det;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5D0000000000000000000C02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../tools/hostsim/stubs",
+					"$(SRCROOT)/../app/src/main/cpp/src",
+				);
+				INFOPLIST_FILE = "NPUBenchDet-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "NPUBench Det";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Metal,
+					"-framework",
+					CoreML,
+					"-framework",
+					UIKit,
+					"-framework",
+					Foundation,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.josta.npubench.det;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5D0000000000000000000A01 /* Build configuration list for PBXProject "NPUBenchDet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5D0000000000000000000B01 /* Debug */,
+				5D0000000000000000000B02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5D0000000000000000000A02 /* Build configuration list for PBXNativeTarget "NPUBenchDet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5D0000000000000000000C01 /* Debug */,
+				5D0000000000000000000C02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5D0000000000000000000001 /* Project object */;
+}

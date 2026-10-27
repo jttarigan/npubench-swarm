@@ -67,7 +67,7 @@ private:
     EGLContext context_ = EGL_NO_CONTEXT;
 
     int screenW_ = 0, screenH_ = 0;
-    int internalH_ = 480;
+    int internalH_ = kInternalH;
     int viewScale_ = 1, viewOffX_ = 0, viewOffY_ = 0;
 
     GLuint atlasTex_ = 0;

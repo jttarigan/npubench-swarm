@@ -3,6 +3,7 @@
 // rows accumulate in memory and hit the filesystem only on flush() —
 // wave end / game end / pause — so logging never perturbs tick timing.
 
+#include <cstdint>
 #include <string>
 
 struct TickRow {
@@ -29,7 +30,27 @@ struct TickRow {
     double battery_temp_c;       // -1 if unknown
     double thermal_headroom;     // AThermal_getThermalHeadroom, -1 if unknown
     int thermal_status;          // AThermal status enum, -1 if unknown
+    uint64_t out_hash;           // FNV-1a 64 of this tick's policy outputs (alive rows)
+    uint64_t state_hash;         // FNV-1a 64 of Game::appendState after the tick
+    const char* prevent;         // study 3 prevention spec, "off" if none
+    int prevent_rows;            // rows recomputed by the portable policy this tick
+    double prevent_ms;           // time spent in prevention (recompute + grid) this tick
     const char* note;
+};
+
+// Fixed-input replay of a recorded trace (determinism study)
+struct ReplayRow {
+    const char* run_id;
+    const char* backend;
+    const char* model_variant;
+    const char* precision;
+    const char* source;          // trace the inputs came from
+    int tick_index;
+    int wave;
+    int batch_size;
+    int alive;
+    double policy_infer_ms;
+    uint64_t out_hash;
 };
 
 struct GestureRow {
@@ -81,6 +102,7 @@ public:
     void add(const TickRow& r);
     void add(const GestureRow& r);
     void add(const ColdRow& r);
+    void add(const ReplayRow& r);
 
     void flush();   // append buffers to disk, clear
 
@@ -88,6 +110,7 @@ private:
     void flushOne(const std::string& path, std::string& buf, const char* header, bool& headerDone);
 
     std::string dir_, runId_;
-    std::string ticks_, gestures_, cold_;
-    bool ticksHeader_ = false, gesturesHeader_ = false, coldHeader_ = false;
+    std::string ticks_, gestures_, cold_, replay_;
+    bool ticksHeader_ = false, gesturesHeader_ = false, coldHeader_ = false,
+         replayHeader_ = false;
 };

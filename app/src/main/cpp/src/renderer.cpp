@@ -152,11 +152,9 @@ bool Renderer::init(ANativeWindow* window) {
     eglQuerySurface(display_, surface_, EGL_WIDTH, &screenW_);
     eglQuerySurface(display_, surface_, EGL_HEIGHT, &screenH_);
 
-    // Internal portrait resolution: fixed 240 wide, height matches screen aspect.
-    internalH_ = (int)(0.5f + (float)kInternalW * (float)screenH_ / (float)screenW_);
-    internalH_ = (internalH_ / 2) * 2;
-    if (internalH_ < 400) internalH_ = 400;
-    if (internalH_ > 640) internalH_ = 640;
+    // Internal portrait resolution: fixed 240 x kInternalH on every device (the
+    // world size is part of the determinism contract); letterboxed to fit.
+    internalH_ = kInternalH;
     viewScale_ = screenW_ / kInternalW;
     int vs2 = screenH_ / internalH_;
     if (vs2 < viewScale_) viewScale_ = vs2;

@@ -15,12 +15,14 @@
 #include "gesture.h"
 #include "input.h"
 #include "nn.h"
+#include "prevention.h"
 #include "renderer.h"
+#include "trace.h"
 
 struct ANativeWindow;
 struct GameActivityMotionEvent;
 
-enum class AppState { MENU, LOADING, PLAYING, BENCH, GAMEOVER, VICTORY, ERRORS };
+enum class AppState { MENU, LOADING, PLAYING, BENCH, GAMEOVER, VICTORY, ERRORS, REPLAY };
 
 class Engine {
 public:
@@ -47,9 +49,18 @@ private:
     void maybeWriteColdRows(bool force);
     void maybeWriteColdRowsForFailure();
 
+    void flushAll();   // CSV + traces, only at the safe flush points
+
     // --- bench ---
     void startBench();
     void benchStep();
+
+    // --- fixed-input replay (determinism study) ---
+    void startReplay();
+    bool setupPrevention();
+    void logPreventionSummary();
+    void replayStep();
+    void renderReplay();
 
     // --- ui ---
     void renderMenu();
@@ -84,7 +95,17 @@ private:
     Precision prec_ = Precision::F32;
     bool glow_ = true;
     bool autoReplay_ = false;         // LOOP toggle: restart run on game-over/victory
+    bool traceOn_ = true;             // TRACE toggle: write run_<id>_trace.bin
     int replayCountdown_ = 0;         // frames until auto-restart (0 = inactive)
+
+    // study 3 experiment C: on-device prevention (debug.npubench.prevent, see prevention.h)
+    Prevention prevent_;
+    PortablePolicy* portable_ = nullptr;
+    std::string portableAsset_;
+    long preventRowsTotal_ = 0, preventRowsSeen_ = 0;
+    double preventMsTotal_ = 0;
+    int lastPreventRows_ = 0;
+    double lastPreventMs_ = 0;
 
     // run state
     int loadingStep_ = 0;
@@ -129,6 +150,16 @@ private:
     // bench
     int benchIdx_ = 0;
     std::vector<std::string> benchLines_;
+
+    // determinism traces
+    std::string filesDir_;
+    TraceWriter trace_;
+    std::vector<uint8_t> stateBuf_;
+    TraceReader replayIn_;
+    TraceWriter replayOut_;
+    size_t replayPos_ = 0;
+    bool replayDone_ = false;
+    std::string replaySrc_;
 
     std::string errorMsg_;
     std::string runId_;

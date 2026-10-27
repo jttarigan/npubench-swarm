@@ -16,8 +16,15 @@ app/                          Android app (all game logic in native C++)
   src/main/jniLibs/arm64-v8a/ libtensorflowlite_jni.so, libtensorflowlite_gpu_jni.so
                               (pinned; SHA256 in this README)
   src/main/assets/models/     12 .tflite models produced by training/train_all.py
+  src/main/cpp/src/trace.*     trace and replay recording (reproducibility study)
+  src/main/cpp/src/prevention.* on-device prevention: rounding grid, guard, portable kernel
 training/train_all.py         policy-net (5 sizes) + gesture-CNN training/export
-analysis/                     (step 6 — analysis scripts, not yet written)
+analysis/                     analysis scripts; study3_*.py for the reproducibility study
+ios/                          iOS harness for the reproducibility study (see ios/README.md)
+tools/hostsim/                host build of the game simulation (re-simulates recordings)
+tools/portable_policy/        portable scalar C kernel of the policy model
+tools/x86kit/                 replay and comparison kit for an x86 PC
+tools/study3_*.{py,sh}        device sessions over adb for the reproducibility study
 ```
 
 ## Pinned inference runtime
@@ -118,6 +125,35 @@ control run demonstrates it doesn't perturb tick timing.
 - Policy output: `[N x 3]` tanh (steer_x, steer_y, fire).
 - Ops kept NNAPI-friendly on purpose: FULLY_CONNECTED / CONV_2D / MAX_POOL_2D /
   MEAN / TANH / SOFTMAX / RESHAPE.
+
+## Reproducibility study
+
+A second study uses the same game to ask whether the enemy-AI model gives bit-identical
+outputs, and therefore the same game, on different chips and backends, as deterministic
+lockstep multiplayer needs. It covers the CPU, GPU and NPU paths of five Android devices,
+two iPhones, a Mac and an x86 PC.
+
+- Recording: with tracing on, the app writes every tick's feature rows, model outputs and
+  game state (`*_trace.bin`). A replay feeds a recorded trace's feature rows to any backend
+  over identical inputs (`*_replay.bin`).
+- Re-simulation: `tools/hostsim/build.sh` builds the game on the Mac;
+  `tools/hostsim/validate_trace.py` re-simulates each recorded game from its recorded
+  outputs and checks the trace byte for byte.
+- Prevention: `app/src/main/cpp/src/prevention.cpp` rounds the model outputs to a coarse
+  grid and recomputes rows near a grid edge with the portable kernel
+  (`tools/portable_policy/`), so every peer takes the same decision.
+- Analysis: every table and figure comes from the recordings through `analysis/study3_*.py`
+  (`study3_crosschip.py` for the cross-device comparison, `study3_mechanism.py`,
+  `study3_guard.py`, `study3_seeds.py` with `cosim.py` and `policy_backends.py`,
+  `study3_figures.py` and others); outputs go to `analysis/out_study3/`.
+- iOS: `ios/README.md` (LiteRT for iOS is not in git; set your own signing team).
+- x86: `tools/x86kit/README.md`.
+
+The recordings (436 trace and replay files, 4.0 GB), the APKs, the models and the iOS
+runtime archives are on Zenodo: https://doi.org/10.5281/zenodo.23660012. Unzip each
+`runs_study3_<device>.zip` in the repository root to get `runs_study3/<device>/`, where
+the analysis scripts expect it. Device serial numbers in that record are replaced by
+`SERIAL-<device>`.
 
 ## Known caveats
 

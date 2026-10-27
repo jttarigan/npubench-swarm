@@ -23,6 +23,8 @@ choose cleaner data. A feature that cannot be measured is not worth building.
 - NPU access via **LiteRT/TFLite NNAPI delegate** (note in paper: NNAPI is deprecated
   as of Android 15; mention MediaTek NeuroPilot as vendor path — a discussion point,
   not necessarily an implementation requirement).
+- Follow-up studies may add other phones and tablets. The current device list is
+  kept outside this repo.
 
 ## The game (benchmark harness)
 

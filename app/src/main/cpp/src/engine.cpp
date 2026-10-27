@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include "policy_portable.h"
+
 std::atomic<float> Engine::batteryTemp{-1.f};
 
 namespace {
@@ -13,7 +15,10 @@ constexpr uint32_t kMagCol = 0xFF3CDCFF;
 constexpr uint32_t kDimCol = 0x9080C0FF;
 constexpr uint32_t kWhiteCol = 0xFFFFFFFF;
 
-enum BtnGroup { GB_BACKEND, GB_MODEL, GB_PREC, GB_GLOW, GB_LOOP, GB_START, GB_BENCH };
+enum BtnGroup {
+    GB_BACKEND, GB_MODEL, GB_PREC, GB_GLOW, GB_LOOP, GB_START, GB_BENCH, GB_TRACE, GB_REPLAY
+};
+constexpr int kReplayTicksPerFrame = 200;
 }  // namespace
 
 // ---------------------------------------------------------------------------
@@ -27,7 +32,10 @@ void Engine::onWindowInit(ANativeWindow* window, AAssetManager* am, const char* 
         return;
     }
     input_.attach(&renderer_);
-    if (filesDir) csv_.configure(filesDir);
+    if (filesDir) {
+        csv_.configure(filesDir);
+        filesDir_ = filesDir;
+    }
     if (!thermal_) thermal_ = AThermal_acquireManager();
     lastFrameNs_ = now_ns();
     accumulatorNs_ = 0;
@@ -37,11 +45,17 @@ void Engine::onWindowInit(ANativeWindow* window, AAssetManager* am, const char* 
 }
 
 void Engine::onWindowLost() {
-    csv_.flush();
+    flushAll();
     renderer_.destroy();
 }
 
-void Engine::onPause() { csv_.flush(); }
+void Engine::onPause() { flushAll(); }
+
+void Engine::flushAll() {
+    csv_.flush();
+    trace_.flush();
+    replayOut_.flush();
+}
 
 void Engine::handleMotionEvent(const GameActivityMotionEvent& ev) { input_.handle(ev); }
 
@@ -78,6 +92,9 @@ void Engine::startGame() {
 void Engine::finishLoading() {
     runId_ = makeRunId("game");
     csv_.startRun(runId_);
+    trace_.stop();
+    if (traceOn_ && !filesDir_.empty())
+        trace_.start(filesDir_ + "/run_" + runId_ + "_trace.bin", "NPBT");
 
     if (!policy_.load(assets_, policyAssetPath(), backend_)) {
         maybeWriteColdRowsForFailure();
@@ -96,6 +113,7 @@ void Engine::finishLoading() {
             return;
         }
     }
+    if (!setupPrevention()) return;
     coldPolicyPending_ = coldGesturePending_ = true;
 
     game_.startRun(renderer_.internalW(), renderer_.internalH());
@@ -134,7 +152,7 @@ void Engine::maybeWriteColdRowsForFailure() {
                        " | gesture: " + gesture_.cold.note + " " + gesture_.errors();
     row.note = note.c_str();
     csv_.add(row);
-    csv_.flush();
+    flushAll();
     enterError("MODEL LOAD FAILED\n" + policy_.cold.note + "\n" + gesture_.cold.note +
                "\nBACKEND: " + backendName(backend_));
 }
@@ -144,7 +162,7 @@ void Engine::beginWave(int idx) {
     double setupMs = 0;
     std::string how;
     if (!policy_.setBatch(kWaveTable[idx], &setupMs, &how)) {
-        csv_.flush();
+        flushAll();
         enterError("BATCH SETUP FAILED AT WAVE " + std::to_string(idx + 1) + "\n" +
                    policy_.errors());
         return;
@@ -163,8 +181,9 @@ void Engine::enterError(const std::string& msg) {
 }
 
 void Engine::endRun(AppState finalState) {
+    logPreventionSummary();
     maybeWriteColdRows(true);
-    csv_.flush();
+    flushAll();
     state_ = finalState;
     // ~2 s at 120 fps; never auto-replay an errored run
     replayCountdown_ = autoReplay_ && finalState != AppState::ERRORS ? 240 : 0;
@@ -270,9 +289,18 @@ void Engine::doTick() {
     double policyMs = 0;
     if (!policy_.invoke(featBuf_, batch * kFeatureDim, outBuf_, batch * kPolicyOut,
                         &policyMs)) {
-        csv_.flush();
+        flushAll();
         enterError("POLICY INVOKE FAILED\n" + policy_.errors());
         return;
+    }
+    lastPreventRows_ = 0;
+    lastPreventMs_ = 0;
+    if (prevent_.active()) {
+        lastPreventRows_ = applyPrevention(prevent_, portable_, featBuf_, outBuf_, alive,
+                                           &lastPreventMs_);
+        preventRowsTotal_ += lastPreventRows_;
+        preventRowsSeen_ += alive;
+        preventMsTotal_ += lastPreventMs_;
     }
 
     // 3. world update
@@ -285,6 +313,14 @@ void Engine::doTick() {
     const double tickTotalMs = ns_to_ms(now_ns() - t0);
     const bool missed = tickTotalMs > kTickBudgetMs;
     if (missed) missCount_++;
+
+    // determinism fingerprints (after the timed section: not part of tick_total_ms)
+    stateBuf_.clear();
+    game_.appendState(stateBuf_);
+    const uint64_t outHash = fnv1a64(outBuf_, sizeof(float) * (size_t)alive * kPolicyOut);
+    const uint64_t stateHash = fnv1a64(stateBuf_.data(), stateBuf_.size());
+    trace_.addTick(tickIndex_, game_.waveIndex() + 1, batch, alive, featBuf_, outBuf_,
+                   game_.aliveIndices(), stateBuf_);
 
     // rolling HUD stats (steady ticks only)
     const bool warm = warmupLeft_ > 0;
@@ -332,10 +368,15 @@ void Engine::doTick() {
     row.glow_on = glow_ ? 1 : 0;
     row.deadline_missed = missed ? 1 : 0;
     row.fps = fps_;
-    row.cpu_threads = kCpuThreads;
+    row.cpu_threads = cpuThreads();
+    row.prevent = prevent_.active() ? prevent_.spec.c_str() : "off";
+    row.prevent_rows = lastPreventRows_;
+    row.prevent_ms = lastPreventMs_;
     row.battery_temp_c = batteryTemp.load();
     row.thermal_headroom = thermalHeadroom_;
     row.thermal_status = thermalStatus_;
+    row.out_hash = outHash;
+    row.state_hash = stateHash;
     row.note = note;
     csv_.add(row);
 
@@ -349,7 +390,7 @@ void Engine::doTick() {
     }
     if (game_.waveCleared() || game_.waveTimedOut()) {
         const int next = game_.waveIndex() + 1;
-        csv_.flush();   // wave boundary: safe flush point (outside measured tick)
+        flushAll();   // wave boundary: safe flush point (outside measured tick)
         if (next >= kNumWaves) {
             endRun(AppState::VICTORY);
         } else {
@@ -416,6 +457,9 @@ void Engine::frame() {
         case AppState::BENCH:
             if (benchIdx_ >= 3 && !taps.empty()) state_ = AppState::MENU;
             break;
+        case AppState::REPLAY:
+            if (replayDone_ && !taps.empty()) state_ = AppState::MENU;
+            break;
         default:
             break;
     }
@@ -458,6 +502,9 @@ void Engine::frame() {
         case AppState::BENCH:
             renderBench();
             break;
+        case AppState::REPLAY:
+            renderReplay();
+            break;
         case AppState::GAMEOVER:
             renderEndScreen("GAME OVER");
             break;
@@ -483,6 +530,8 @@ void Engine::frame() {
         }
     } else if (state_ == AppState::BENCH && benchIdx_ < 3) {
         benchStep();
+    } else if (state_ == AppState::REPLAY && !replayDone_) {
+        replayStep();
     }
 }
 
@@ -525,7 +574,7 @@ void Engine::benchStep() {
         snprintf(line, sizeof(line), "%s: FAILED (%s)", backendName(b), m.cold.note.c_str());
         benchLines_.push_back(line);
         benchIdx_++;
-        if (benchIdx_ >= 3) csv_.flush();
+        if (benchIdx_ >= 3) flushAll();
         return;
     }
 
@@ -538,7 +587,7 @@ void Engine::benchStep() {
         snprintf(line, sizeof(line), "%s: BATCH FAILED", backendName(b));
         benchLines_.push_back(line);
         benchIdx_++;
-        if (benchIdx_ >= 3) csv_.flush();
+        if (benchIdx_ >= 3) flushAll();
         return;
     }
 
@@ -583,7 +632,153 @@ void Engine::benchStep() {
     LOGI("bench %s", line);
 
     benchIdx_++;
-    if (benchIdx_ >= 3) csv_.flush();
+    if (benchIdx_ >= 3) flushAll();
+}
+
+// ---------------------------------------------------------------------------
+// fixed-input replay: feed a recorded trace's policy inputs (same batch shape
+// per tick) to the selected backend; no simulation, not real-time
+// ---------------------------------------------------------------------------
+
+void Engine::startReplay() {
+    state_ = AppState::REPLAY;
+    replayDone_ = false;
+    replayPos_ = 0;
+    runId_ = makeRunId("replay");
+    csv_.startRun(runId_);
+    replayOut_.stop();
+    const std::string src = filesDir_ + "/replay_input.bin";
+    if (!replayIn_.load(src)) {
+        enterError("REPLAY INPUT MISSING\nadb push a run_*_trace.bin to\n" + src +
+                   "\n" + replayIn_.err());
+        return;
+    }
+    char buf[64];
+    snprintf(buf, sizeof(buf), "replay_input.bin#%016llx",
+             (unsigned long long)replayIn_.fileHash());
+    replaySrc_ = buf;
+    if (!policy_.load(assets_, policyAssetPath(), backend_)) {
+        enterError("MODEL LOAD FAILED\n" + policy_.cold.note);
+        return;
+    }
+    if (!setupPrevention()) return;
+    replayOut_.start(filesDir_ + "/run_" + runId_ + "_replay.bin", "NPBR");
+    LOGI("replay %s: %zu ticks from %s", runId_.c_str(), replayIn_.ticks().size(),
+         replaySrc_.c_str());
+}
+
+// Reads debug.npubench.prevent for this run and loads the portable policy if needed.
+bool Engine::setupPrevention() {
+    prevent_ = preventionFromProperty();
+    preventRowsTotal_ = preventRowsSeen_ = 0;
+    preventMsTotal_ = 0;
+    lastPreventRows_ = 0;
+    lastPreventMs_ = 0;
+    if (!prevent_.active()) return true;
+    if (prec_ != Precision::F32) {
+        LOGW("prevention %s ignored: float32 models only", prevent_.spec.c_str());
+        prevent_ = Prevention();
+        return true;
+    }
+    if (prevent_.needsPortable()) {
+        const std::string asset = std::string("models/policy_") + kModelVariants[variant_] + "_f32.nppw";
+        if (asset != portableAsset_ || !portable_) {
+            pp_free(portable_);
+            portable_ = nullptr;
+            portableAsset_.clear();
+            AAsset* a = AAssetManager_open(assets_, asset.c_str(), AASSET_MODE_BUFFER);
+            if (a) {
+                portable_ = pp_load(AAsset_getBuffer(a), (unsigned long)AAsset_getLength(a));
+                AAsset_close(a);
+            }
+            if (!portable_) {
+                enterError("PORTABLE MODEL LOAD FAILED\n" + asset);
+                return false;
+            }
+            portableAsset_ = asset;
+        }
+    }
+    LOGI("prevention %s for run %s", prevent_.spec.c_str(), runId_.c_str());
+    return true;
+}
+
+void Engine::logPreventionSummary() {
+    if (!prevent_.active()) return;
+    LOGI("prevention %s run %s: %ld of %ld rows recomputed, %.2f ms recompute in total",
+         prevent_.spec.c_str(), runId_.c_str(), preventRowsTotal_, preventRowsSeen_,
+         preventMsTotal_);
+}
+
+void Engine::replayStep() {
+    const auto& ticks = replayIn_.ticks();
+    for (int n = 0; n < kReplayTicksPerFrame && replayPos_ < ticks.size(); n++, replayPos_++) {
+        const TraceTick& t = ticks[replayPos_];
+        if (t.batch < t.alive || t.batch > 96) {
+            enterError("REPLAY: BAD BATCH IN TRACE");
+            return;
+        }
+        if (t.batch != policy_.batch()) {
+            double setupMs;
+            std::string how;
+            if (!policy_.setBatch(t.batch, &setupMs, &how)) {
+                flushAll();
+                enterError("REPLAY BATCH SETUP FAILED\n" + policy_.errors());
+                return;
+            }
+        }
+        // trace rows may be unaligned: copy, then zero the padding rows
+        memcpy(featBuf_, t.feat, sizeof(float) * (size_t)t.alive * kFeatureDim);
+        memset(featBuf_ + t.alive * kFeatureDim, 0,
+               sizeof(float) * (size_t)(t.batch - t.alive) * kFeatureDim);
+        double ms = 0;
+        if (!policy_.invoke(featBuf_, t.batch * kFeatureDim, outBuf_, t.batch * kPolicyOut,
+                            &ms)) {
+            flushAll();
+            enterError("REPLAY INVOKE FAILED\n" + policy_.errors());
+            return;
+        }
+        if (prevent_.active()) {
+            double pm = 0;
+            preventRowsTotal_ += applyPrevention(prevent_, portable_, featBuf_, outBuf_, t.alive, &pm);
+            preventRowsSeen_ += t.alive;
+            preventMsTotal_ += pm;
+        }
+        ReplayRow row{};
+        row.run_id = runId_.c_str();
+        row.backend = backendName(backend_);
+        row.model_variant = kModelVariants[variant_];
+        row.precision = precisionName(prec_);
+        row.source = replaySrc_.c_str();
+        row.tick_index = t.tick;
+        row.wave = t.wave;
+        row.batch_size = t.batch;
+        row.alive = t.alive;
+        row.policy_infer_ms = ms;
+        row.out_hash = fnv1a64(outBuf_, sizeof(float) * (size_t)t.alive * kPolicyOut);
+        csv_.add(row);
+        replayOut_.addReplayTick(t.tick, t.wave, t.batch, t.alive, outBuf_);
+    }
+    if (replayPos_ >= ticks.size()) {
+        flushAll();
+        replayDone_ = true;
+        logPreventionSummary();
+        LOGI("replay %s done", runId_.c_str());
+    }
+}
+
+void Engine::renderReplay() {
+    const int W = renderer_.internalW();
+    renderer_.textCentered(W / 2, 40, "FIXED-INPUT REPLAY", kCyanCol, 2);
+    char buf[96];
+    snprintf(buf, sizeof(buf), "%s %s %s", backendName(backend_), kModelVariants[variant_],
+             precisionName(prec_));
+    renderer_.textCentered(W / 2, 64, buf, kDimCol);
+    snprintf(buf, sizeof(buf), "TICK %zu / %zu", replayPos_, replayIn_.ticks().size());
+    renderer_.textCentered(W / 2, 90, buf, kWhiteCol);
+    if (replayDone_) {
+        renderer_.textCentered(W / 2, 116, "DONE - CSV + BIN FLUSHED", kCyanCol);
+        renderer_.textCentered(W / 2, 132, "TAP FOR MENU", kWhiteCol);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -613,6 +808,8 @@ void Engine::handleMenuTap(Vec2 p) {
             case GB_PREC: prec_ = (Precision)b.index; break;
             case GB_GLOW: glow_ = b.index == 0; break;
             case GB_LOOP: autoReplay_ = !autoReplay_; break;
+            case GB_TRACE: traceOn_ = !traceOn_; break;
+            case GB_REPLAY: startReplay(); break;
             case GB_START: startGame(); break;
             case GB_BENCH: startBench(); break;
         }
@@ -657,11 +854,16 @@ void Engine::renderMenu() {
     menuButton(GB_GLOW, 1, 124, (float)y, 52, 18, "OFF", !glow_);
     menuButton(GB_LOOP, 0, 184, (float)y, 48, 18, "LOOP", autoReplay_);
 
-    menuButton(GB_START, 0, (float)(W / 2 - 70), 228, 140, 26, "START RUN", true);
-    menuButton(GB_BENCH, 0, (float)(W / 2 - 90), 264, 180, 20, "BENCH ALL BACKENDS", false);
+    y = 220;
+    rowLabel(y, "DETERM");
+    menuButton(GB_TRACE, 0, 68, (float)y, 52, 18, "TRACE", traceOn_);
+    menuButton(GB_REPLAY, 0, 124, (float)y, 108, 18, "REPLAY INPUT", false);
+
+    menuButton(GB_START, 0, (float)(W / 2 - 70), 252, 140, 26, "START RUN", true);
+    menuButton(GB_BENCH, 0, (float)(W / 2 - 90), 288, 180, 20, "BENCH ALL BACKENDS", false);
 
     // instrument info
-    int iy = 300;
+    int iy = 322;
     renderer_.text(8, iy, "TFLITE C API 1.4.2  THREADS 4", kDimCol);
     iy += 10;
     renderer_.text(8, iy, "TICK 60HZ  BUDGET 16.6MS", kDimCol);

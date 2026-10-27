@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include "trace.h"
+
 namespace {
 constexpr float kDt = 1.f / (float)kTickHz;
 constexpr float kEnemyMaxSpeed = 120.f;   // feature spec PF1 normalizes vel by this
@@ -17,6 +19,26 @@ constexpr float kZoneMaxRadius = 90.f;
 constexpr float kOuterMargin = 48.f;      // soft world bounds beyond the screen
 constexpr int kPlayerMaxHp = 10;
 }  // namespace
+
+// sin(2*pi*p) from plain float arithmetic, so the policy's time feature does
+// not depend on the device's libm (bionic versions differ across phones).
+// p is reduced to [0,1) with floor (exact); odd Taylor series to x^11 on
+// [-pi/2, pi/2]; max abs error 2.2e-7 vs double sin (float rounding).
+float detSin2Pi(float p) {
+    p -= std::floor(p);
+    float q = p - 0.5f;                 // sin(2*pi*p) = -sin(2*pi*q)
+    float x = 6.2831853f * q;           // [-pi, pi)
+    if (x > 1.5707963f) x = 3.1415927f - x;
+    else if (x < -1.5707963f) x = -3.1415927f - x;
+    const float x2 = x * x;
+    float s = -2.5052108e-08f;          // -1/11!
+    s = s * x2 + 2.7557319e-06f;        //  1/9!
+    s = s * x2 - 1.9841270e-04f;        // -1/7!
+    s = s * x2 + 8.3333333e-03f;        //  1/5!
+    s = s * x2 - 1.6666667e-01f;        // -1/3!
+    s = s * x2 + 1.f;
+    return -(x * s);
+}
 
 uint32_t Game::rnd() {
     uint32_t x = rngState_;
@@ -94,7 +116,7 @@ void Game::setShipTarget(Vec2 t, bool active) {
 int Game::buildFeatures(float* feat) const {
     aliveIdx_.clear();
     const float W = (float)W_, H = (float)H_;
-    const float tSin = std::sin(2.f * 3.14159265f * simT_ / 3.f);
+    const float tSin = detSin2Pi(simT_ / 3.f);   // PF1 feature 13: sin(2*pi*t/3s)
     int n = 0;
     for (int i = 0; i < (int)enemies_.size(); i++) {
         const Enemy& e = enemies_[i];
@@ -283,6 +305,19 @@ void Game::simulate(float dt) {
     std::erase_if(bullets_, [](const Bullet& b) { return !b.alive; });
     std::erase_if(zones_, [](const ZoneFx& z) { return z.t > z.duration; });
     std::erase_if(beams_, [](const BeamFx& f) { return f.t > kBeamDuration; });
+}
+
+void Game::appendState(std::vector<uint8_t>& b) const {
+    put<uint16_t>(b, (uint16_t)enemies_.size());
+    for (const Enemy& e : enemies_) {
+        put<float>(b, e.pos.x);
+        put<float>(b, e.pos.y);
+        put<uint8_t>(b, e.alive ? 1 : 0);
+    }
+    put<int16_t>(b, (int16_t)hp_);
+    put<int32_t>(b, score_);
+    put<uint16_t>(b, (uint16_t)bullets_.size());
+    put<uint32_t>(b, rngState_);
 }
 
 void Game::damageEnemy(Enemy& e, float amount) {

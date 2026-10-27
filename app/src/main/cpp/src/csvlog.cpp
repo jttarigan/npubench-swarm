@@ -9,7 +9,11 @@ namespace {
 constexpr const char* kTicksHeader =
     "run_id,backend,model_variant,precision,batch_mode,wave,batch_size,alive,tick_index,warmup,"
     "tick_total_ms,feat_ms,policy_infer_ms,sim_ms,render_ms,gpu_render_ms,glow_on,"
-    "deadline_missed,fps,cpu_threads,battery_temp_c,thermal_headroom,thermal_status,note\n";
+    "deadline_missed,fps,cpu_threads,battery_temp_c,thermal_headroom,thermal_status,"
+    "out_hash,state_hash,prevent,prevent_rows,prevent_ms,note\n";
+constexpr const char* kReplayHeader =
+    "run_id,backend,model_variant,precision,source,tick_index,wave,batch_size,alive,"
+    "policy_infer_ms,out_hash\n";
 constexpr const char* kGesturesHeader =
     "run_id,backend,precision,gesture_class,confidence,stroke_points,resample_ms,infer_ms,"
     "finger_up_to_effect_ms,accepted,note\n";
@@ -38,19 +42,23 @@ void CsvLogger::startRun(const std::string& runId) {
     ticks_.clear();     ticks_.reserve(1 << 20);
     gestures_.clear();  gestures_.reserve(1 << 14);
     cold_.clear();      cold_.reserve(1 << 14);
-    ticksHeader_ = gesturesHeader_ = coldHeader_ = false;
+    replay_.clear();
+    ticksHeader_ = gesturesHeader_ = coldHeader_ = replayHeader_ = false;
     LOGI("CSV run started: %s (dir %s)", runId_.c_str(), dir_.c_str());
 }
 
 void CsvLogger::add(const TickRow& r) {
     char buf[512];
     snprintf(buf, sizeof(buf),
-             "%s,%s,%s,%s,%s,%d,%d,%d,%d,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%.2f,%d,%.1f,%.4f,%d,%s\n",
+             "%s,%s,%s,%s,%s,%d,%d,%d,%d,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%.2f,%d,%.1f,%.4f,%d,"
+             "%016llx,%016llx,%s,%d,%.4f,%s\n",
              r.run_id, r.backend, r.model_variant, r.precision, r.batch_mode, r.wave,
              r.batch_size, r.alive, r.tick_index, r.warmup, r.tick_total_ms, r.feat_ms,
              r.policy_infer_ms, r.sim_ms, r.render_ms, r.gpu_render_ms, r.glow_on,
              r.deadline_missed, r.fps, r.cpu_threads, r.battery_temp_c, r.thermal_headroom,
-             r.thermal_status, safe(r.note).c_str());
+             r.thermal_status, (unsigned long long)r.out_hash,
+             (unsigned long long)r.state_hash, safe(r.prevent).c_str(), r.prevent_rows,
+             r.prevent_ms, safe(r.note).c_str());
     ticks_ += buf;
 }
 
@@ -73,6 +81,15 @@ void CsvLogger::add(const ColdRow& r) {
              r.steady_p50_ms, r.steady_p95_ms, r.steady_p99_ms,
              safe(r.nnapi_devices).c_str(), safe(r.note).c_str());
     cold_ += buf;
+}
+
+void CsvLogger::add(const ReplayRow& r) {
+    char buf[384];
+    snprintf(buf, sizeof(buf), "%s,%s,%s,%s,%s,%d,%d,%d,%d,%.4f,%016llx\n", r.run_id,
+             r.backend, r.model_variant, r.precision, safe(r.source).c_str(), r.tick_index,
+             r.wave, r.batch_size, r.alive, r.policy_infer_ms,
+             (unsigned long long)r.out_hash);
+    replay_ += buf;
 }
 
 void CsvLogger::flushOne(const std::string& path, std::string& buf, const char* header,
@@ -98,4 +115,5 @@ void CsvLogger::flush() {
     flushOne(dir_ + "/run_" + runId_ + "_gestures.csv", gestures_, kGesturesHeader,
              gesturesHeader_);
     flushOne(dir_ + "/run_" + runId_ + "_coldstart.csv", cold_, kColdHeader, coldHeader_);
+    flushOne(dir_ + "/run_" + runId_ + "_replay.csv", replay_, kReplayHeader, replayHeader_);
 }

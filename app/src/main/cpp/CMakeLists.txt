@@ -18,6 +18,12 @@ set(JNILIBS_DIR ${LITERT_LIB_DIR})
 # SONAMEs, live in jniLibs (so they are packaged), and this sidesteps AGP
 # trying to snapshot/copy imported libs into its obj folder on Windows.
 
+# Study 3 portable policy (shared with the Mac tools): plain C, fixed summation order, no
+# FMA contraction, so it computes the same float32 bits on every platform.
+set(PORTABLE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../tools/portable_policy)
+set_source_files_properties(${PORTABLE_DIR}/policy_portable.c PROPERTIES
+    COMPILE_OPTIONS "-O2;-ffp-contract=off;-fno-fast-math;-std=c99")
+
 add_library(npubench SHARED
     src/main.cpp
     src/engine.cpp
@@ -27,9 +33,12 @@ add_library(npubench SHARED
     src/gesture.cpp
     src/nn.cpp
     src/game.cpp
-    src/csvlog.cpp)
+    src/csvlog.cpp
+    src/trace.cpp
+    src/prevention.cpp
+    ${PORTABLE_DIR}/policy_portable.c)
 
-target_include_directories(npubench PRIVATE ${LITERT_DIR}/include src)
+target_include_directories(npubench PRIVATE ${LITERT_DIR}/include src ${PORTABLE_DIR})
 target_compile_features(npubench PRIVATE cxx_std_20)
 target_compile_options(npubench PRIVATE -Wall -O2)
 

@@ -3,6 +3,7 @@
 // Enemy behaviour comes exclusively from the policy net — buildFeatures() and
 // applyPolicy() share a compaction order so batched rows line up.
 
+#include <cstdint>
 #include <vector>
 
 #include "common.h"
@@ -33,6 +34,9 @@ struct ZoneFx {
 // persistent beam: damages intersecting enemies for its lifetime
 struct BeamFx { Vec2 a, b; float t = 0.f; };
 
+// sin(2*pi*p) without libm (determinism across devices); see game.cpp
+float detSin2Pi(float p);
+
 class Game {
 public:
     void startRun(int w, int h);
@@ -52,6 +56,11 @@ public:
     int buildFeatures(float* feat) const;
     void applyPolicy(const float* out, int n);   // consumes [n x kPolicyOut]
     void simulate(float dt);
+    // feature row k belongs to enemy slot aliveIndices()[k] (valid after buildFeatures)
+    const std::vector<int>& aliveIndices() const { return aliveIdx_; }
+    // Appends the gameplay state that decides the outcome (see trace.h for the
+    // layout). Hashing it each tick gives the determinism fingerprint.
+    void appendState(std::vector<uint8_t>& b) const;
 
     // gesture abilities (applied immediately; effect timestamp taken by caller)
     void castZone(Vec2 at, float radius);
@@ -59,6 +68,9 @@ public:
     void castShield();
 
     void render(Renderer& r) const;              // world phase only
+
+    // Host co-simulation only (tools/hostsim): another spawn seed after startRun().
+    void setSeed(uint32_t s) { rngState_ = s ? s : 0x9E3779B9u; }
 
 private:
     uint32_t rnd();                              // xorshift32, seeded per run

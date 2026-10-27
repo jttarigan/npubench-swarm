@@ -1,9 +1,11 @@
 #include "nn.h"
 
 #include <dlfcn.h>
+#include <sys/system_properties.h>
 
 #include <algorithm>
 #include <cstdarg>
+#include <cstdlib>
 #include <cstring>
 
 #include "tflite/c/c_api_experimental.h"
@@ -81,6 +83,15 @@ NnapiRuntime& nnapiRuntime() {
 
 }  // namespace
 
+int cpuThreads() {
+    static const int n = [] {
+        char v[PROP_VALUE_MAX] = {0};
+        int t = __system_property_get("debug.npubench.cpu_threads", v) > 0 ? atoi(v) : 0;
+        return (t >= 1 && t <= 8) ? t : kCpuThreads;
+    }();
+    return n;
+}
+
 const std::string& nnapiDeviceList() { return nnapiRuntime().deviceList; }
 const std::string& nnapiAcceleratorName() { return nnapiRuntime().acceleratorName; }
 
@@ -156,9 +167,9 @@ bool NnModel::load(AAssetManager* am, const std::string& assetPath, Backend back
     }
     curBatch_ = 1;
     invokes_ = 0;
-    LOGI("model %s loaded on %s: load %.2fms delegate %.2fms create %.2fms alloc %.2fms",
+    LOGI("model %s loaded on %s: load %.2fms delegate %.2fms create %.2fms alloc %.2fms threads %d",
          assetPath.c_str(), backendName(backend_), cold.load_ms, cold.delegate_ms,
-         cold.create_ms, cold.alloc_ms);
+         cold.create_ms, cold.alloc_ms, cpuThreads());
     return true;
 }
 
@@ -198,7 +209,7 @@ bool NnModel::createInterpreter(int batch, double* delegateMs, double* createMs,
     t0 = now_ns();
     opts_ = TfLiteInterpreterOptionsCreate();
     TfLiteInterpreterOptionsSetErrorReporter(opts_, &NnModel::reporterTrampoline, this);
-    TfLiteInterpreterOptionsSetNumThreads(opts_, kCpuThreads);
+    TfLiteInterpreterOptionsSetNumThreads(opts_, cpuThreads());
     if (delegate_) {
         TfLiteInterpreterOptionsAddDelegate(opts_, delegate_);
         // fail loudly instead of silently benchmarking CPU as "GPU"/"NPU"

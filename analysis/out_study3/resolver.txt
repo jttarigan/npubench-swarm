@@ -1,0 +1,7 @@
+Mac M5, TensorFlow 2.20.0 | values differing over 370,062 (max abs diff)
+f32  | XNNPACK (default)    | Android CPU (R1): 230645 (1.3e-06) | iPhone CPU 2.20 (R11): 234458 (1.2e-06) | iPhone CPU 2.17 (R19): 242963 (1.1e-06)
+f32  | built-in, no XNNPACK | Android CPU (R1): 201908 (1.2e-06) | iPhone CPU 2.20 (R11): 0 (0) | iPhone CPU 2.17 (R19): 187913 (3e-07)
+f32  | reference kernels    | Android CPU (R1): 232540 (1.3e-06) | iPhone CPU 2.20 (R11): 219796 (8.3e-07) | iPhone CPU 2.17 (R19): 225204 (8.3e-07)
+int8 | XNNPACK (default)    | Android CPU (R2): 4658 (0.11) | iPhone CPU (R12): 0 (0)
+int8 | built-in, no XNNPACK | Android CPU (R2): 4658 (0.11) | iPhone CPU (R12): 0 (0)
+int8 | reference kernels    | Android CPU (R2): 0 (0) | iPhone CPU (R12): 4658 (0.11)

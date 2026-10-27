@@ -9,6 +9,9 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <chrono>
+#endif
 
 #define LOG_TAG "NPUBench"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -16,11 +19,19 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // --- timing: CLOCK_MONOTONIC only, never wall clock (PROJECT_BRIEF) ---
+#ifdef _WIN32
+// MSVC has no clock_gettime; steady_clock is the monotonic clock there (x86 kit host build only).
+inline int64_t now_ns() {
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+               std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+#else
 inline int64_t now_ns() {
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return static_cast<int64_t>(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
 }
+#endif
 inline double ns_to_ms(int64_t ns) { return static_cast<double>(ns) * 1e-6; }
 
 // --- simulation / measurement contract ---
@@ -28,8 +39,16 @@ constexpr int     kTickHz        = 60;
 constexpr int64_t kTickNs        = 16666667;        // 16.666 ms hard tick budget
 constexpr double  kTickBudgetMs  = 16.666667;
 constexpr int     kInternalW     = 240;             // low-res pixel pipeline width (portrait)
+// World + internal render height, FIXED so every device simulates the same
+// world (determinism study). 534 = what the Poco X6 Pro's 1220x2712 screen
+// produced under the old aspect-derived formula, so its runs are unchanged;
+// other aspects get letterboxed by the integer upscale.
+constexpr int     kInternalH     = 534;
 constexpr int     kWarmupTicks   = 10;              // first K inferences logged as warmup
-constexpr int     kCpuThreads    = 4;               // fixed XNNPACK/CPU thread count, recorded per row
+constexpr int     kCpuThreads    = 4;               // LiteRT CPU thread count (default), recorded per row
+// Effective CPU thread count: kCpuThreads unless the system property
+// debug.npubench.cpu_threads holds 1..8 (set with adb shell setprop; study 3).
+int cpuThreads();
 constexpr int     kWaveTable[]   = {8, 16, 24, 32, 40, 48, 56, 64, 72, 80};
 constexpr int     kNumWaves      = 10;              // wave number == batch size sweep
 constexpr float   kWaveTimeoutS  = 40.0f;           // wave auto-advances so the sweep always completes

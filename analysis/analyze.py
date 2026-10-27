@@ -18,7 +18,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-BUDGET_MS = 16.667  # 60 Hz tick budget
+BUDGET_MS = 16.667      # 60 Hz tick budget (logged deadline flag)
+BUDGET_120_MS = 8.333   # 120 Hz tick budget (modern gaming displays)
 PARAMS = {"tiny": 291, "small": 1635, "medium": 5315, "large": 35331,
           "l192": 77571, "l256": 136195, "xlarge": 534531}
 BACKEND_ORDER = {"cpu": 0, "gpu": 1, "npu": 2}
@@ -117,9 +118,12 @@ def infer_stats(rows):
     rend = np.array([fnum(r, "render_ms") for r in rows])
     rend = rend[np.isfinite(rend) & (rend >= 0)]
     miss = sum(1 for r in rows if r.get("deadline_missed") == "1")
+    over120 = int((inf > BUDGET_120_MS).sum()) if len(inf) else 0
     return {
         "n_ticks": len(rows), "miss": miss,
         "miss_rate": miss / len(rows) if rows else float("nan"),
+        "over120": over120,
+        "over120_rate": over120 / len(inf) if len(inf) else float("nan"),
         "mean": float(inf.mean()) if len(inf) else float("nan"),
         "std": float(inf.std()) if len(inf) else float("nan"),
         "p50": pct(inf, 50), "p95": pct(inf, 95), "p99": pct(inf, 99),
@@ -143,14 +147,15 @@ with open(tick_stats_path, "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["backend", "model", "precision", "wave", "N", "n_ticks",
                 "infer_mean_ms", "infer_std_ms", "infer_p50_ms", "infer_p95_ms",
-                "infer_p99_ms", "miss_count", "miss_rate", "render_mean_ms",
-                "tick_total_p95_ms"])
+                "infer_p99_ms", "miss_count", "miss_rate", "over120_count",
+                "over120_rate", "render_mean_ms", "tick_total_p95_ms"])
     for key in wave_keys:
         s = infer_stats(by_wave[key])
         w.writerow(list(key) + [s["n_ticks"],
                    f"{s['mean']:.4f}", f"{s['std']:.4f}", f"{s['p50']:.4f}",
                    f"{s['p95']:.4f}", f"{s['p99']:.4f}", s["miss"],
-                   f"{s['miss_rate']:.4f}", f"{s['render_mean']:.4f}",
+                   f"{s['miss_rate']:.4f}", s["over120"],
+                   f"{s['over120_rate']:.4f}", f"{s['render_mean']:.4f}",
                    f"{s['tick_p95']:.4f}"])
 print(f"wrote {tick_stats_path} ({len(wave_keys)} rows)")
 
@@ -189,9 +194,11 @@ for key in sorted(by_cfg, key=lambda k: (BACKEND_ORDER.get(k[0], 9),
     rows.append([key[0], key[1], key[2], g["runs"], s["n_ticks"],
                  f"{s['mean']:.3f}", f"{s['p50']:.3f}", f"{s['p95']:.3f}",
                  f"{s['p99']:.3f}", s["miss"], f"{100*s['miss_rate']:.2f}%",
+                 s["over120"], f"{100*s['over120_rate']:.2f}%",
                  f"{s['render_mean']:.3f}", f"{s['tick_p95']:.3f}"])
 md_table(md, ["backend", "model", "prec", "runs", "ticks", "inf mean", "p50",
-              "p95", "p99", "miss", "miss%", "render mean", "tick p95"], rows)
+              "p95", "p99", "miss", "miss%", ">8.33", ">8.33%",
+              "render mean", "tick p95"], rows)
 
 # cold-start table (phase == cold)
 md.append("## Cold start (phase=cold rows; ms, mean over runs, -1 = failed excluded)")
@@ -274,12 +281,14 @@ def save(fig, name):
 
 
 def budget_line(ax):
-    ax.axhline(BUDGET_MS, color="red", ls=":", lw=1, label=f"{BUDGET_MS} ms budget")
+    ax.axhline(BUDGET_120_MS, color="black", ls="--", lw=1.3,
+               label="8.33 ms tick (120 Hz)")
 
 
 # latency_vs_N.png -- xlarge game runs, mean with p95 band vs batch size
 fig, ax = plt.subplots(figsize=(7, 4.5))
 xl = {k: v for k, v in by_wave.items() if k[1] == "xlarge"}
+ymax = 0.0
 for bp in sorted({(k[0], k[2]) for k in xl}, key=lambda t: (BACKEND_ORDER.get(t[0], 9), t[1])):
     per_n = {}
     for k, v in xl.items():
@@ -288,9 +297,11 @@ for bp in sorted({(k[0], k[2]) for k in xl}, key=lambda t: (BACKEND_ORDER.get(t[
     ns = sorted(per_n)
     means = [infer_stats(per_n[n])["mean"] for n in ns]
     p95s = [infer_stats(per_n[n])["p95"] for n in ns]
+    ymax = max(ymax, max(p95s))
     line, = ax.plot(ns, means, marker="o", label=f"{bp[0]} {bp[1]}")
     ax.fill_between(ns, means, p95s, alpha=0.2, color=line.get_color())
 budget_line(ax)
+ax.set_ylim(0, max(BUDGET_120_MS * 1.15, ymax * 1.06))
 ax.set_xlabel("batch size N (swarm size)")
 ax.set_ylabel("policy_infer_ms (mean, band to p95)")
 ax.set_title("xlarge policy net: inference latency vs batch size (game runs)")
@@ -314,11 +325,12 @@ for (backend, prec) in sorted({(k[0], k[2]) for k in bench_by},
     pts.sort()
     ax.plot([x for x, _ in pts], [y for _, y in pts], marker="o",
             ls="--" if prec == "int8" else "-", label=f"{backend} {prec}")
-if any(fnum(r, "steady_mean_ms") > 2 for g in bench_by.values() for r in g):
-    budget_line(ax)
+budget_line(ax)
 ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_ylim(top=BUDGET_120_MS * 1.3)
 ax.set_xlabel("policy-net parameters")
-ax.set_ylabel("steady_mean_ms (batch 32)")
+ax.set_ylabel("steady_mean_ms (batch 32, log scale)")
 ax.set_title("backend crossover: steady inference vs model size (micro-bench)")
 ax.legend()
 save(fig, "crossover.png")
@@ -399,13 +411,23 @@ for r in gesture_rows:
         eff_by.setdefault(r.get("backend", "?"), []).append(v)
 if eff_by:
     fig, ax = plt.subplots(figsize=(7, 4.5))
+    X_CAP = 18.0  # one stray NPU gesture at ~41 ms would stretch the axis
     lo = min(min(v) for v in eff_by.values())
-    hi = max(max(v) for v in eff_by.values())
+    hi = min(max(max(v) for v in eff_by.values()), X_CAP)
     bins = np.linspace(lo, hi, 40)
+    clipped = []
     for backend in sorted(eff_by, key=lambda b: BACKEND_ORDER.get(b, 9)):
-        ax.hist(eff_by[backend], bins=bins, alpha=0.55,
+        vals = [v for v in eff_by[backend] if v <= X_CAP]
+        clipped += [(backend, v) for v in eff_by[backend] if v > X_CAP]
+        ax.hist(vals, bins=bins, alpha=0.55,
                 label=f"{backend} (n={len(eff_by[backend])})")
-    ax.axvline(BUDGET_MS, color="red", ls=":", lw=1, label=f"{BUDGET_MS} ms budget")
+    ax.axvline(BUDGET_120_MS, color="black", ls="--", lw=1.3,
+               label="8.33 ms tick (120 Hz)")
+    ax.set_xlim(0, X_CAP)
+    if clipped:
+        note = ", ".join(f"{v:.0f} ms ({b})" for b, v in sorted(clipped, key=lambda t: -t[1]))
+        ax.annotate(f"off-scale: {note}", xy=(0.98, 0.55),
+                    xycoords="axes fraction", ha="right", fontsize=8)
     ax.set_xlabel("finger_up_to_effect_ms")
     ax.set_ylabel("gestures")
     ax.set_title("gesture cast latency: finger up -> world-state change")
@@ -431,8 +453,10 @@ if setup_by:
     ax.bar_label(bars, fmt="%.2f")
     ax.set_xticks(range(len(keys)), [f"{b}\n{p}" for b, p in keys])
     ax.set_yscale("log")
+    budget_line(ax)
     ax.set_ylabel("wave-boundary setup_ms (mean, log scale)")
     ax.set_title("per-wave batch resize/recompile cost, xlarge game runs")
+    ax.legend()
     save(fig, "wave_setup.png")
 else:
     print("wave_setup.png skipped: no setup_ms notes found")
